@@ -2,6 +2,13 @@ import { Project } from './types';
 
 const LOREM_IPSUM = "This project explores the relationship between digital interfaces and human intuition. Through a rigorous process of iteration and user testing, we arrived at a solution that feels both inevitable and surprising.";
 
+export const ABOUT_DATA = {
+  title: "Human-centeredness matters — it sees people as they truly are, not as perfect models.",
+  description: "I am a designer skilled in cross-disciplinary thinking, with rich creativity and outstanding collaborative abilities. I create truly human-centered designs through media such as film, gaming, and architecture.",
+  // You can change this URL to any image link you prefer
+  imageUrl: "https://i.imgur.com/mzOlKIx.jpeg"
+};
+
 export const LARGE_PROJECTS: Project[] = [
   {
     id: 'l1',
