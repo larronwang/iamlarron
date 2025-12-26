@@ -5,35 +5,39 @@ import { ArrowRight } from 'lucide-react';
 interface Project3DDeckProps {
   projects: Project[];
   onProjectClick: (project: Project) => void;
+  // Added featuredIds to interface to fix the reported TypeScript error in App.tsx
   featuredIds?: string[];
-  title?: string;
   className?: string;
 }
 
 const Project3DDeck: React.FC<Project3DDeckProps> = ({ 
   projects, 
   onProjectClick, 
+  // Destructured featuredIds from props to match the caller's usage
   featuredIds = [],
-  title,
   className = ""
 }) => {
   const deckId = useMemo(() => `deck-${Math.random().toString(36).substr(2, 9)}`, []);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Deterministic random generator for layout variations
   const seededRandom = (seed: number) => {
     const x = Math.sin(seed * 9999) * 10000;
     return x - Math.floor(x);
   };
 
-  // Determine properties of the currently hovered item to adjust animation physics
   const hoveredProject = hoveredIndex !== null ? projects[hoveredIndex] : null;
-  const isHoveredFeatured = hoveredProject ? featuredIds.includes(hoveredProject.id) : false;
   
-  // Dynamic Push Distance:
-  // If the active card is "Featured" (Large), we need a large push (320px) to prevent clipping.
-  // If the active card is "Small", we use a smaller push (180px) so neighbors don't fly away too far.
-  const activePushDistance = isHoveredFeatured ? 320 : 180;
+  const getActivePushDistance = () => {
+    if (!hoveredProject) return 0;
+    switch (hoveredProject.displaySize) {
+      case 'large': return 420;
+      case 'medium': return 300;
+      case 'small': return 180;
+      default: return 220;
+    }
+  };
+
+  const activePushDistance = getActivePushDistance();
 
   return (
     <div className={`w-full ${className} flex justify-center`}>
@@ -43,13 +47,9 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
            perspective-origin: 50% 50%;
         }
 
-        /* 
-           Card Base 
-        */
         .${deckId}-card {
           transform-style: preserve-3d;
           transform-origin: center bottom;
-          /* Smooth transition for all transform changes */
           transition: 
             transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), 
             margin 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -59,83 +59,76 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
           will-change: transform, margin-left;
         }
 
-        /* 
-           The Spine (Thickness) - Super thin like photo paper
-        */
         .${deckId}-spine {
           position: absolute;
           left: 0;
           top: 0;
-          bottom: 0;
-          width: 1px; /* Thinned to 1px */
+          height: 100%;
+          width: 1px;
           transform-origin: left;
           transform: rotateY(-90deg);
-          background: rgba(0,0,0,0.1);
+          background: rgba(0,0,0,0.08);
+          pointer-events: none;
         }
 
-        /* Shadow Element */
         .${deckId}-shadow {
            position: absolute;
-           bottom: -15px;
+           bottom: 0;
            left: 5%;
            width: 90%;
-           height: 15px;
-           background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
-           filter: blur(5px);
+           height: 20px;
+           background: radial-gradient(ellipse at center, rgba(0,0,0,0.25) 0%, transparent 70%);
+           filter: blur(8px);
            opacity: 0.4;
-           transform: rotateX(90deg) translateZ(0px);
+           transform: rotateX(90deg) translateY(10px);
            transition: all 0.6s;
            pointer-events: none;
         }
 
-        /* Show shadow depth when hovered/lifted */
         .${deckId}-card.active .${deckId}-shadow {
-           opacity: 0.2;
-           transform: rotateX(90deg) translateZ(-60px) scale(1.1);
-           filter: blur(10px);
+           opacity: 0.15;
+           transform: rotateX(90deg) translateY(40px) scale(1.2);
+           filter: blur(15px);
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {title && (
-        <h3 className="px-6 md:px-12 text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 ml-4">
-          {title}
-        </h3>
-      )}
-
-      {/* Scroll Container */}
-      <div 
-        className={`${deckId}-container w-full overflow-x-auto overflow-y-visible no-scrollbar py-20 flex justify-center`}
-      >
-        {/* Flex container */}
-        <div className="flex items-end px-12 pb-8 pt-12" style={{ transformStyle: 'preserve-3d' }}>
+      <div className={`${deckId}-container w-full overflow-x-auto overflow-y-visible no-scrollbar py-32 flex justify-center`}>
+        <div className="flex items-end px-12 pb-20 pt-12" style={{ transformStyle: 'preserve-3d' }}>
           {projects.map((project, index) => {
-            const isFeatured = featuredIds.includes(project.id);
-            
-            // Random calc
             const r1 = seededRandom(index * 7 + 1);
             const r2 = seededRandom(index * 3 + 2);
             const r3 = seededRandom(index * 11 + 3);
             
-            // Size: Compact
-            const baseSize = isFeatured ? 400 : 220; 
-            const variance = isFeatured ? 20 : 15;
-            const size = baseSize + (r1 * variance * 2 - variance);
+            let baseWidth = 220;
+            let baseMargin = -150;
+            
+            if (project.displaySize === 'large') {
+                baseWidth = 440;
+                baseMargin = -320;
+            } else if (project.displaySize === 'medium') {
+                baseWidth = 310;
+                baseMargin = -210;
+            } else {
+                baseWidth = 190;
+                baseMargin = -130;
+            }
 
-            // Base Rotation: Tighter angles
+            const variance = 10;
+            const width = baseWidth + (r1 * variance * 2 - variance);
+            // Image is strictly square, but card container is taller to fit text below
+            const imageHeight = width; 
+            const textHeight = 80;
+            const totalHeight = imageHeight + textHeight;
+
             const baseRotY = 50 + (r2 * 5); 
             const baseRotX = (r3 * 4 - 2);
             const baseRotZ = (r1 * 2 - 1);
 
-            // Margins: Slightly looser than before to allow breathing room (-300 -> -260, -190 -> -150)
-            const baseMargin = isFeatured ? -260 : -150;
-            const marginVar = 5;
-            const randomMarginOffset = (r3 * marginVar * 2 - marginVar);
-            const marginLeft = index === 0 ? 0 : baseMargin + randomMarginOffset;
+            const marginLeft = index === 0 ? 0 : baseMargin;
 
-            // --- INTERACTION LOGIC ---
             const isHovered = hoveredIndex === index;
             const isLeft = hoveredIndex !== null && index < hoveredIndex;
             const isRight = hoveredIndex !== null && index > hoveredIndex;
@@ -146,15 +139,12 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
 
             if (hoveredIndex !== null) {
               if (isHovered) {
-                // ACTIVE CARD: Flat, scaled up, pulled forward
-                transformString = `translateX(0px) rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.15) translateZ(100px)`;
+                transformString = `translateX(0px) rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.1) translateZ(180px)`;
                 zIndex = 1000;
                 activeClass = 'active';
               } else if (isLeft) {
-                // LEFT NEIGHBORS: Push left
                 transformString = `translateX(-${activePushDistance}px) ` + transformString;
               } else if (isRight) {
-                // RIGHT NEIGHBORS: Push right
                 transformString = `translateX(${activePushDistance}px) ` + transformString;
               }
             }
@@ -171,41 +161,57 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
                   cursor-pointer group
                 `}
                 style={{ 
-                   width: `${size}px`,
-                   height: `${size}px`,
+                   width: `${width}px`,
+                   height: `${totalHeight}px`,
                    zIndex: zIndex,
                    marginLeft: `${marginLeft}px`,
                    transform: transformString,
                 }}
               >
-                {/* Floor Shadow */}
-                <div className={`${deckId}-shadow`}></div>
+                {/* Shadow logic attached to the bottom of the square image, not the whole container */}
+                <div className={`${deckId}-shadow`} style={{ bottom: `${textHeight}px` }}></div>
+                <div className={`${deckId}-spine`} style={{ height: `${imageHeight}px` }}></div>
 
-                {/* 1. Spine (Paper thin) */}
-                <div className={`${deckId}-spine`}></div>
-
-                {/* 2. Front Face */}
-                <div className="absolute inset-0 bg-white shadow-2xl backface-hidden overflow-hidden">
+                {/* 1. Square Image Surface */}
+                <div 
+                  className="absolute top-0 left-0 w-full bg-white shadow-xl backface-hidden overflow-hidden border border-gray-100"
+                  style={{ height: `${imageHeight}px` }}
+                >
                   <img
                     src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
                   />
                   
-                  {/* Texture */}
-                  <div className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
-                  
-                  {/* Subtle Reflection Gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent opacity-40 pointer-events-none" />
+                  {/* Visual textures */}
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-20 pointer-events-none" />
+                </div>
 
-                  {/* Hover Overlay Content */}
-                  <div className={`absolute inset-0 bg-black/80 flex flex-col justify-center items-center text-center p-8 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-                     <span className="text-xs font-mono text-blue-400 mb-4 uppercase tracking-wider">{project.category}</span>
-                     <h4 className="text-white text-xl font-bold leading-none tracking-tight mb-6">{project.title}</h4>
-                     
-                     <div className="flex items-center gap-3 text-white/70 text-xs uppercase tracking-widest border border-white/20 px-4 py-2 rounded-full hover:bg-white hover:text-black transition-colors">
-                        View <ArrowRight className="w-3 h-3" />
-                     </div>
+                {/* 2. Text Label Area (External - Below Image) */}
+                <div 
+                  className={`
+                    absolute left-0 w-full flex flex-col justify-start pt-4 transition-all duration-500
+                    ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+                  `}
+                  style={{ top: `${imageHeight}px`, height: `${textHeight}px` }}
+                >
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="overflow-hidden">
+                      <p className="text-[10px] font-mono text-blue-500 mb-1 uppercase tracking-[0.2em]">
+                        {project.category}
+                      </p>
+                      <h4 className={`text-black font-bold leading-tight tracking-tight ${project.displaySize === 'large' ? 'text-2xl' : 'text-base'}`}>
+                        {project.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-medium">
+                        {project.year} — {project.role}
+                      </p>
+                    </div>
+                    
+                    <div className="flex-none mt-1 p-2 rounded-full bg-gray-50 border border-gray-100 group-hover:bg-black group-hover:text-white transition-all duration-300">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
                   </div>
                 </div>
               </div>

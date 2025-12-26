@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import HeroCanvas from './components/HeroCanvas';
-import ProjectDetail from './components/ProjectDetail';
-import Project3DDeck from './components/Project3DDeck';
-import { KEY_PROJECTS, MINOR_PROJECTS } from './constants';
-import { Project } from './types';
+import React, { useState, useEffect } from 'react';
+import Navbar from './components/Navbar.tsx';
+import HeroCanvas from './components/HeroCanvas.tsx';
+import ProjectDetail from './components/ProjectDetail.tsx';
+import Project3DDeck from './components/Project3DDeck.tsx';
+import { KEY_PROJECTS, MINOR_PROJECTS } from './constants.ts';
+import { Project } from './types.ts';
 import { Mail, Linkedin, Twitter, Github } from 'lucide-react';
 
-// Sort: Large (Key) projects first, then Small (Minor) projects
-// This creates a natural visual hierarchy from Left to Right
 const ALL_PROJECTS: Project[] = [...KEY_PROJECTS, ...MINOR_PROJECTS];
 
 const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleOpenProject = (project: Project) => {
     setSelectedProject(project);
@@ -30,27 +33,36 @@ const App: React.FC = () => {
     }
   };
 
+  const handlePrevProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = ALL_PROJECTS.findIndex(p => p.id === selectedProject.id);
+    if (currentIndex > 0) {
+      setSelectedProject(ALL_PROJECTS[currentIndex - 1]);
+    }
+  };
+
   const isNextAvailable = selectedProject 
     ? ALL_PROJECTS.findIndex(p => p.id === selectedProject.id) < ALL_PROJECTS.length - 1
     : false;
 
-  // Identify featured IDs for special styling in the deck
+  const isPrevAvailable = selectedProject
+    ? ALL_PROJECTS.findIndex(p => p.id === selectedProject.id) > 0
+    : false;
+
   const featuredIds = KEY_PROJECTS.map(p => p.id);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F5F5F7]">
       <Navbar />
 
       {/* Hero Section */}
-      <section id="home" className="h-screen w-full">
+      <section id="home" className="h-screen w-full overflow-hidden bg-[#F5F5F7]">
         <HeroCanvas />
       </section>
 
       {/* Portfolio Section */}
-      {/* Changed to h-screen for a tighter, single-viewport fit */}
       <section id="portfolio" className="h-screen w-full bg-gray-50 overflow-hidden relative flex flex-col justify-center">
-        {/* Background Grid */}
-        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+        <div className={`absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none transition-opacity duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`} />
         
         <div className="container mx-auto px-6 relative z-10 mb-4">
            <div className="flex items-end justify-between border-b border-gray-200 pb-4">
@@ -71,10 +83,6 @@ const App: React.FC = () => {
            </div>
         </div>
 
-        {/* 
-          Single Unified Deck
-          Projects flow from Big (Left) to Small (Right)
-        */}
         <div className="relative z-20 w-full mt-[-20px]">
             <Project3DDeck 
                 projects={ALL_PROJECTS} 
@@ -84,7 +92,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* About Section - Dark Theme */}
+      {/* About Section */}
       <section id="about" className="py-32 bg-black text-white">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
@@ -95,25 +103,6 @@ const App: React.FC = () => {
                     With over a decade of experience in the digital space, I help brands and startups 
                     bridge the gap between complex technology and human-centric design.
                 </p>
-                <div className="grid grid-cols-2 gap-8 text-sm text-gray-500 pt-8">
-                    <div>
-                        <h4 className="text-white font-semibold mb-2">Services</h4>
-                        <ul className="space-y-1">
-                            <li>Art Direction</li>
-                            <li>UI/UX Design</li>
-                            <li>Frontend Development</li>
-                            <li>Brand Strategy</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="text-white font-semibold mb-2">Recognition</h4>
-                        <ul className="space-y-1">
-                            <li>Awwwards SOTD</li>
-                            <li>FWA Site of the Day</li>
-                            <li>Behance Featured</li>
-                        </ul>
-                    </div>
-                </div>
             </div>
             <div className="relative h-[600px] bg-gray-900 rounded-none overflow-hidden border border-white/10">
                 <img 
@@ -140,7 +129,7 @@ const App: React.FC = () => {
             </a>
 
             <div className="mt-24 flex justify-center gap-8">
-                {[Github, Twitter, Linkedin].map((Icon, i) => (
+                {[Github, Twitter, Linkedin].map((Icon: any, i: number) => (
                     <a key={i} href="#" className="p-4 bg-white border border-gray-200 hover:border-black transition-colors duration-300 text-gray-700 hover:text-black shadow-sm">
                         <Icon className="w-6 h-6" />
                     </a>
@@ -153,13 +142,14 @@ const App: React.FC = () => {
         <p>&copy; {new Date().getFullYear()} Nexus Portfolio. All rights reserved.</p>
       </footer>
 
-      {/* Overlay Modal */}
       {selectedProject && (
         <ProjectDetail 
             project={selectedProject} 
             onClose={handleCloseProject}
             onNext={handleNextProject}
+            onPrev={handlePrevProject}
             isNextAvailable={isNextAvailable}
+            isPrevAvailable={isPrevAvailable}
         />
       )}
     </div>
