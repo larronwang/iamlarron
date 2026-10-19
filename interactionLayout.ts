@@ -1,4 +1,7 @@
 export const HERO_NAME = 'CHE.';
+// Default scales remain relative to the responsive layout, not fixed pixel sizes.
+export const DEFAULT_HOME_ZOOM = 0.8;
+export const DEFAULT_PORTFOLIO_ZOOM = 0.7;
 // Tight ink bounds of the supplied artwork; keep the original image untouched.
 export const HERO_WORDMARK = { src: '/projects/che-wordmark.png', x: 682, y: 621, width: 1292, height: 340 };
 export const MIN_ZOOM = 0.55;

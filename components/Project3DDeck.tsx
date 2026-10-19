@@ -1,7 +1,7 @@
 import React, { useId, useRef, useState } from 'react';
 import { Project } from '../types';
 import { ArrowRight } from 'lucide-react';
-import { deckScale } from '../interactionLayout';
+import { DEFAULT_PORTFOLIO_ZOOM, deckScale } from '../interactionLayout';
 import { useInteractiveViewport } from './useInteractiveViewport';
 import ZoomControls from './ZoomControls';
 
@@ -22,7 +22,7 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
 }) => {
   const deckId = `deck-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const containerRef = useRef<HTMLDivElement>(null);
-  const viewport = useInteractiveViewport(containerRef);
+  const viewport = useInteractiveViewport(containerRef, DEFAULT_PORTFOLIO_ZOOM);
   const scale = deckScale(viewport.width, viewport.height) * viewport.zoom;
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 

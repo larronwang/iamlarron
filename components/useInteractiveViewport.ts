@@ -1,9 +1,10 @@
 import { RefObject, useEffect, useState } from 'react';
 import { clamp, handleZoomWheel, MAX_ZOOM, MIN_ZOOM } from '../interactionLayout';
 
-export function useInteractiveViewport<T extends HTMLElement>(ref: RefObject<T>) {
+export function useInteractiveViewport<T extends HTMLElement>(ref: RefObject<T>, initialZoom = 1) {
+  const defaultZoom = clamp(initialZoom, MIN_ZOOM, MAX_ZOOM);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(defaultZoom);
 
   useEffect(() => {
     const element = ref.current;
@@ -27,9 +28,9 @@ export function useInteractiveViewport<T extends HTMLElement>(ref: RefObject<T>)
   }, [ref]);
 
   return {
-    ...size, zoom,
+    ...size, zoom, defaultZoom,
     zoomIn: () => setZoom(current => clamp(current * 1.12, MIN_ZOOM, MAX_ZOOM)),
     zoomOut: () => setZoom(current => clamp(current / 1.12, MIN_ZOOM, MAX_ZOOM)),
-    resetZoom: () => setZoom(1),
+    resetZoom: () => setZoom(defaultZoom),
   };
 }

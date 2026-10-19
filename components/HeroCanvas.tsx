@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { HERO_NAME, HERO_WORDMARK, heroWordmarkLayout } from '../interactionLayout';
+import { DEFAULT_HOME_ZOOM, HERO_NAME, HERO_WORDMARK, heroWordmarkLayout } from '../interactionLayout';
 import { useInteractiveViewport } from './useInteractiveViewport';
 import ZoomControls from './ZoomControls';
 
@@ -7,7 +7,7 @@ const HeroCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
-  const viewport = useInteractiveViewport(containerRef);
+  const viewport = useInteractiveViewport(containerRef, DEFAULT_HOME_ZOOM);
   
   useEffect(() => {
     const canvas = canvasRef.current;

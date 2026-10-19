@@ -9,6 +9,19 @@ const module = { exports: {} };
 runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText,
   { module, exports: module.exports });
 const { HERO_NAME, HERO_WORDMARK, heroWordmarkLayout, deckScale, wheelZoom, handleZoomWheel, MIN_ZOOM, MAX_ZOOM } = module.exports;
+const { DEFAULT_HOME_ZOOM, DEFAULT_PORTFOLIO_ZOOM } = module.exports;
+
+test('home starts at 80% and portfolio at 70% without losing responsive sizing', () => {
+  assert.equal(DEFAULT_HOME_ZOOM, 0.8);
+  assert.equal(DEFAULT_PORTFOLIO_ZOOM, 0.7);
+  for (const [width, height] of [[390, 844], [1280, 720]]) {
+    const fullSize = heroWordmarkLayout(width, height, 1);
+    const defaultSize = heroWordmarkLayout(width, height, DEFAULT_HOME_ZOOM);
+    assert.ok(Math.abs(defaultSize.width / fullSize.width - 0.8) < 0.001);
+    assert.ok(defaultSize.x > fullSize.x);
+  }
+  assert.ok(deckScale(390, 600) * DEFAULT_PORTFOLIO_ZOOM < deckScale(1280, 600) * DEFAULT_PORTFOLIO_ZOOM);
+});
 
 test('interactive signature uses the provided CHE. artwork', () => {
   assert.equal(HERO_NAME, 'CHE.');
