@@ -8,24 +8,30 @@ const source = readFileSync(new URL('../interactionLayout.ts', import.meta.url),
 const module = { exports: {} };
 runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText,
   { module, exports: module.exports });
-const { HERO_NAME, HERO_LINES, heroLayout, deckScale, wheelZoom, handleZoomWheel, MIN_ZOOM, MAX_ZOOM } = module.exports;
-const measure = (text, size) => text.length * size * 0.65;
+const { HERO_NAME, HERO_WORDMARK, heroWordmarkLayout, deckScale, wheelZoom, handleZoomWheel, MIN_ZOOM, MAX_ZOOM } = module.exports;
 
-test('interactive heading spells the requested name exactly', () => {
-  assert.equal(HERO_NAME, 'yiyang che wang');
-  assert.equal(HERO_LINES.join(' '), HERO_NAME);
+test('interactive signature uses the provided CHE. artwork', () => {
+  assert.equal(HERO_NAME, 'CHE.');
+  assert.equal(HERO_WORDMARK.src, '/projects/che-wordmark.png');
+  const artwork = readFileSync(new URL(`../public${HERO_WORDMARK.src}`, import.meta.url));
+  assert.equal(artwork.subarray(1, 4).toString(), 'PNG');
+  assert.ok(HERO_WORDMARK.x + HERO_WORDMARK.width <= 2388);
+  assert.ok(HERO_WORDMARK.y + HERO_WORDMARK.height <= 1668);
 });
 
-test('name typography fits small, landscape and large viewports at every zoom boundary', () => {
+test('signature preserves its proportions and fits every viewport and zoom boundary', () => {
   for (const [width, height] of [[320, 568], [390, 844], [844, 390], [1280, 720], [1920, 1080]]) {
     for (const zoom of [MIN_ZOOM, 1, MAX_ZOOM]) {
-      const layout = heroLayout(width, height, zoom, measure);
-      assert.ok(Math.max(...HERO_LINES.map(line => measure(line, layout.fontSize))) <= width * 0.82 + 0.01);
-      assert.ok(layout.fontSize + layout.lineHeight <= height * 0.42 + 0.01);
+      const layout = heroWordmarkLayout(width, height, zoom);
+      assert.ok(layout.width <= width * 0.88 + 0.01);
+      assert.ok(layout.height <= height * 0.38 + 0.01);
+      assert.ok(Math.abs(layout.width / layout.height - HERO_WORDMARK.width / HERO_WORDMARK.height) < 0.001);
+      assert.ok(layout.x >= 0 && layout.y >= 0);
+      assert.ok(layout.x + layout.width <= width && layout.y + layout.height <= height);
     }
   }
-  assert.ok(heroLayout(390, 844, 1, measure).fontSize < heroLayout(1280, 720, 1, measure).fontSize);
-  assert.ok(heroLayout(1280, 720, 1, measure).fontSize < 140);
+  assert.ok(heroWordmarkLayout(390, 844, 1).width < heroWordmarkLayout(1280, 720, 1).width);
+  assert.ok(heroWordmarkLayout(1280, 720, MAX_ZOOM).width > heroWordmarkLayout(1280, 720, 1).width);
 });
 
 test('card scale responds to width and available height and stays smaller than the old default', () => {

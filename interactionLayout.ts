@@ -1,5 +1,6 @@
-export const HERO_NAME = 'yiyang che wang';
-export const HERO_LINES = ['yiyang che', 'wang'];
+export const HERO_NAME = 'CHE.';
+// Tight ink bounds of the supplied artwork; keep the original image untouched.
+export const HERO_WORDMARK = { src: '/projects/che-wordmark.png', x: 682, y: 621, width: 1292, height: 340 };
 export const MIN_ZOOM = 0.55;
 export const MAX_ZOOM = 1.65;
 
@@ -21,15 +22,13 @@ export function handleZoomWheel(event: Pick<WheelEvent, 'ctrlKey' | 'metaKey' | 
   return true;
 }
 
-export function heroLayout(width: number, height: number, zoom: number,
-  measure: (text: string, size: number) => number) {
-  const baseSize = Math.max(20, Math.min(width * 0.12, height * 0.15, 120));
-  let fontSize = baseSize * clamp(zoom, MIN_ZOOM, MAX_ZOOM);
-  const widest = Math.max(...HERO_LINES.map(line => measure(line, fontSize)));
-  const textHeight = fontSize * (1 + 1.08 * (HERO_LINES.length - 1));
-  fontSize *= Math.min(1, width * 0.82 / Math.max(1, widest), height * 0.42 / Math.max(1, textHeight));
-  const lineHeight = fontSize * 1.08;
-  return { fontSize, lineHeight, startY: height * 0.46 - lineHeight * (HERO_LINES.length - 1) / 2 };
+export function heroWordmarkLayout(width: number, height: number, zoom: number) {
+  const aspect = HERO_WORDMARK.width / HERO_WORDMARK.height;
+  const widthRatio = width < 640 ? 0.76 : 0.55;
+  const baseWidth = Math.min(width * widthRatio, height * 1.05, 760);
+  const inkWidth = Math.min(baseWidth * clamp(zoom, MIN_ZOOM, MAX_ZOOM), width * 0.88, height * 0.38 * aspect);
+  const inkHeight = inkWidth / aspect;
+  return { x: (width - inkWidth) / 2, y: height * 0.46 - inkHeight / 2, width: inkWidth, height: inkHeight };
 }
 
 export function deckScale(width: number, height: number) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { HERO_LINES, HERO_NAME, heroLayout } from '../interactionLayout';
+import { HERO_NAME, HERO_WORDMARK, heroWordmarkLayout } from '../interactionLayout';
 import { useInteractiveViewport } from './useInteractiveViewport';
 import ZoomControls from './ZoomControls';
 
@@ -26,7 +26,8 @@ const HeroCanvas: React.FC = () => {
     let height = 0;
     
     let mouse = { x: -9999, y: -9999, radius: 0 };
-    const BASE_GAP = 3; 
+    const BASE_GAP = 2;
+    const wordmark = new Image();
     
     class Particle {
       x: number;
@@ -87,7 +88,7 @@ const HeroCanvas: React.FC = () => {
       }
     }
 
-    const init = () => {
+    const init = (artwork: HTMLImageElement | null) => {
       if (!canvas || !container || !ctx) return;
 
       particles = [];
@@ -109,17 +110,17 @@ const HeroCanvas: React.FC = () => {
       ctx.fillRect(0, 0, width, height);
       
       ctx.fillStyle = '#1D1D1F';
-      const layout = heroLayout(rect.width, rect.height, viewport.zoom, (text, size) => {
-        ctx.font = `900 ${size * dpr}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
-        return ctx.measureText(text).width / dpr;
-      });
-      ctx.font = `900 ${layout.fontSize * dpr}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      HERO_LINES.forEach((line, index) => {
-        ctx.fillText(line, width / 2, (layout.startY + index * layout.lineHeight) * dpr);
-      });
+      const layout = heroWordmarkLayout(rect.width, rect.height, viewport.zoom);
+      if (artwork) {
+        ctx.drawImage(artwork, HERO_WORDMARK.x, HERO_WORDMARK.y, HERO_WORDMARK.width, HERO_WORDMARK.height,
+          layout.x * dpr, layout.y * dpr, layout.width * dpr, layout.height * dpr);
+      } else {
+        // A readable fallback keeps the home usable if the local artwork cannot load.
+        ctx.font = `italic 700 ${layout.height * dpr}px cursive`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(HERO_NAME, width / 2, rect.height * 0.46 * dpr, layout.width * dpr);
+      }
 
       const imageData = ctx.getImageData(0, 0, width, height);
       const data = imageData.data;
@@ -174,14 +175,19 @@ const HeroCanvas: React.FC = () => {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    document.fonts.ready.then(() => {
-        if (disposed) return;
-        init();
-        animate();
-    });
+    const start = (artwork: HTMLImageElement | null) => {
+      if (disposed) return;
+      init(artwork);
+      animate();
+    };
+    wordmark.onload = () => start(wordmark);
+    wordmark.onerror = () => start(null);
+    wordmark.src = HERO_WORDMARK.src;
 
     return () => {
       disposed = true;
+      wordmark.onload = null;
+      wordmark.onerror = null;
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
@@ -189,8 +195,8 @@ const HeroCanvas: React.FC = () => {
   }, [viewport.width, viewport.height, viewport.zoom]);
 
   return (
-    <div ref={containerRef} aria-label="Interactive name" className="w-full h-full bg-[#F5F5F7] relative select-none overflow-hidden">
-      <h1 className="sr-only">{HERO_NAME}</h1>
+    <div ref={containerRef} aria-label="Interactive CHE. signature" className="w-full h-full bg-[#F5F5F7] relative select-none overflow-hidden">
+      <h1 className="sr-only">{HERO_NAME} — Yiyang Che Wang</h1>
       <canvas 
         aria-hidden="true"
         ref={canvasRef} 
