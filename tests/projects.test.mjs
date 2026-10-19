@@ -13,12 +13,19 @@ const compiled = ts.transpileModule(source, {
 }).outputText;
 const module = { exports: {} };
 runInNewContext(compiled, { module, exports: module.exports });
-const { ALL_PROJECTS, KEY_PROJECTS } = module.exports;
+const { ALL_PROJECTS, KEY_PROJECTS, LARGE_PROJECTS, MEDIUM_PROJECTS } = module.exports;
 const newIds = ['l-same-table', 'l-the-pass', 'l-classroom'];
 
-test('all 14 original projects remain and the three new projects are featured first', () => {
+test('all 14 original projects remain and the three new projects lead the medium tier', () => {
   assert.equal(ALL_PROJECTS.length, 17);
-  assert.deepEqual(Array.from(KEY_PROJECTS.slice(0, 3), p => p.id), newIds);
+  assert.deepEqual(Array.from(MEDIUM_PROJECTS.slice(0, 3), p => p.id), newIds);
+  assert.deepEqual(Array.from(KEY_PROJECTS, p => p.id), ['l1', 'l2', 'l3', 'l4']);
+  assert.equal(LARGE_PROJECTS.length, 4);
+  for (const id of newIds) {
+    assert.equal(ALL_PROJECTS.find(p => p.id === id).displaySize, 'medium');
+    assert.ok(!LARGE_PROJECTS.some(p => p.id === id));
+  }
+  assert.deepEqual(Array.from(ALL_PROJECTS.slice(4, 7), p => p.id), newIds);
   for (const id of ['l1', 'l2', 'l3', 'l4', 'm1', 'm2', 'm3', 'm4', 's0', 's1', 's2', 's3', 's4', 's5']) {
     assert.ok(ALL_PROJECTS.some(p => p.id === id), `Missing original project ${id}`);
   }

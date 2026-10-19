@@ -9,7 +9,7 @@ export const ABOUT_DATA = {
   imageUrl: "https://i.imgur.com/mzOlKIx.jpeg"
 };
 
-export const LARGE_PROJECTS: Project[] = [
+const NEW_PROJECTS: Project[] = [
   {
     id: 'l-same-table',
     title: 'Same Table, Next Time?',
@@ -19,7 +19,7 @@ export const LARGE_PROJECTS: Project[] = [
     imageUrl: '/projects/same-table/cover.jpg',
     year: 'Fall 2026',
     role: 'Designer, Developer, Writer',
-    displaySize: 'large',
+    displaySize: 'medium',
     tools: ['JavaScript', 'p5.js', 'Illustration', 'Interactive Narrative'],
     externalUrl: 'https://same-table-next-time.netlify.app',
     externalUrlLabel: 'Experience the story',
@@ -42,7 +42,7 @@ export const LARGE_PROJECTS: Project[] = [
     year: '2026 — Present',
     role: 'Game Designer, Developer',
     status: 'Playable prototype · In development',
-    displaySize: 'large',
+    displaySize: 'medium',
     tools: ['JavaScript', 'Three.js', 'Game Systems', 'Spatial Interaction'],
     externalUrl: '/demos/the-pass.html',
     externalUrlLabel: 'Play the browser prototype',
@@ -65,7 +65,7 @@ export const LARGE_PROJECTS: Project[] = [
     year: 'September 2026 — Present',
     role: 'Research & Design Team Member',
     status: 'Research synthesis & concept design · In progress',
-    displaySize: 'large',
+    displaySize: 'medium',
     tools: ['Observation', 'Interviews', 'Affinity Mapping', 'SCAMPER', 'Storyboarding'],
     caseStudy: [
       { heading: 'My contribution & the team process', body: 'I conducted two 30-minute classroom observations and two student interviews. As part of a four-person team, I contributed to research synthesis, brainstorming, concept refinement, and storyboarding. The affinity diagram and question journey map shown below are collaborative team outputs.' },
@@ -76,7 +76,10 @@ export const LARGE_PROJECTS: Project[] = [
     ],
     schematicImages: ['/projects/hci/affinity.png', '/projects/hci/journey-map.png', '/projects/hci/storyboard.jpg'],
     imageCaptions: ['Team affinity diagram synthesizing classroom observations and interviews.', 'Team journey map: from noticing confusion to seeking help and resolving or losing a question.', 'Concept storyboard: private feedback and confidence ratings inform an instructor’s natural pause. Illustrative scenario, not an evaluated outcome.']
-  },
+  }
+];
+
+export const LARGE_PROJECTS: Project[] = [
   {
     id: 'l1',
     title: "Auditor's Cut",
@@ -165,6 +168,7 @@ export const LARGE_PROJECTS: Project[] = [
 ];
 
 export const MEDIUM_PROJECTS: Project[] = [
+  ...NEW_PROJECTS,
   {
     id: 'm1',
     title: "Finder",
