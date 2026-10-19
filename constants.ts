@@ -9,6 +9,76 @@ export const ABOUT_DATA = {
   imageUrl: "https://i.imgur.com/mzOlKIx.jpeg"
 };
 
+const NEW_PROJECTS: Project[] = [
+  {
+    id: 'l-same-table',
+    title: 'Same Table, Next Time?',
+    category: 'Expressive Computing · Course Project',
+    description: 'An interactive postcard about the words we leave unsaid.',
+    fullDescription: 'One restaurant table, one family dinner, and the thoughts that never make it into conversation. This illustrated web narrative turns a postcard into a place to explore the difference between what people say and what they feel.',
+    imageUrl: '/projects/same-table/cover.jpg',
+    year: 'Fall 2026',
+    role: 'Designer, Developer, Writer',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'p5.js', 'Illustration', 'Interactive Narrative'],
+    externalUrl: 'https://same-table-next-time.netlify.app',
+    externalUrlLabel: 'Experience the story',
+    caseStudy: [
+      { heading: 'From postcard to conversation', body: 'The project began with an original illustration of people gathering around a dining table. I developed it into a short family sitcom: Emma is leaving for college, her parents are proud, and her younger brother hides affection behind jokes about taking her room.' },
+      { heading: 'Two layers of storytelling', body: 'Speech bubbles carry the shared conversation. Hovering over or clicking a character reveals private thoughts and a handwritten signature in the postcard’s writing area. A click or the Space key advances the dialogue; the interaction offers different perspectives on the same dinner rather than a branching plot.' },
+      { heading: 'Designing restraint', body: 'I kept the top-down composition and a stationary table, using limited animation and blurred movement around it. Reusing the postcard’s writing area for unsent letters gave the interaction a narrative purpose without adding a separate game interface.' },
+      { heading: 'An ending beyond one family', body: 'After the family leaves, other groups gather and depart in a quickening montage. The final empty table invites the audience to imagine the many ordinary stories that the same place might hold.' }
+    ],
+    schematicImages: ['/projects/same-table/original-postcard.png', '/projects/same-table/interactive-postcard.jpg'],
+    imageCaptions: ['Original postcard illustration: a fixed table within the movement of a restaurant.', 'Playable p5.js version: the dining scene above, the postcard’s private writing space below.']
+  },
+  {
+    id: 'l-the-pass',
+    title: 'The Pass',
+    category: 'Independent Game Prototype',
+    description: 'Three tables. Two courses. Four minutes of hospitality.',
+    fullDescription: 'A browser-based 3D hospitality game about balancing the mechanics of service with the people at each table. Run the floor alone with an assisted kitchen, or share the service in local co-op.',
+    imageUrl: '/projects/the-pass/cover.jpg',
+    year: '2026 — Present',
+    role: 'Game Designer, Developer',
+    status: 'Playable prototype · In development',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'Three.js', 'Game Systems', 'Spatial Interaction'],
+    externalUrl: '/demos/the-pass.html',
+    externalUrlLabel: 'Play the browser prototype',
+    caseStudy: [
+      { heading: 'A complete service loop', body: 'Take orders, fire kitchen tickets, cook, collect plates at the pass, serve both courses, and clear the tables. The prototype compresses this loop into a four-minute service with three tables, making pacing and task order immediately visible.' },
+      { heading: 'Listening is a spatial choice', body: 'Guest conversations can only be heard nearby. Moving between kitchen tasks and tables determines which fragments of a conversation the player encounters, bringing environmental storytelling into the service loop.' },
+      { heading: 'Care alongside efficiency', body: 'Players can check in, pour water, and offer a small card. Guest-specific reviews respond to completed service, food quality, and pacing rather than rewarding repetitive gestures. Solo and same-keyboard co-op modes test different divisions of responsibility.' },
+      { heading: 'Prototype scope', body: 'This version uses primitive 3D geometry, fixed guests, and text dialogue to explore the core systems. It is an in-development prototype, not a finished commercial release; the demo requires a desktop browser with WebGL.' }
+    ],
+    schematicImages: ['/projects/the-pass/service.jpg'],
+    imageCaptions: ['The playable prototype: a shared restaurant floor, contextual service actions, and kitchen tickets.']
+  },
+  {
+    id: 'l-classroom',
+    title: 'Classroom Participation',
+    category: 'Georgia Tech HCI · Group Project',
+    description: 'Making room for participation beyond raising a hand.',
+    fullDescription: 'An ongoing HCI research and design project examining how college students notice confusion, decide whether to speak, and seek help during technical lectures. The design question is not how to make everyone talk more, but how to support different ways of participating.',
+    imageUrl: '/projects/hci/storyboard.jpg',
+    year: 'September 2026 — Present',
+    role: 'Research & Design Team Member',
+    status: 'Research synthesis & concept design · In progress',
+    displaySize: 'medium',
+    tools: ['Observation', 'Interviews', 'Affinity Mapping', 'SCAMPER', 'Storyboarding'],
+    caseStudy: [
+      { heading: 'My contribution & the team process', body: 'I conducted two 30-minute classroom observations and two student interviews. As part of a four-person team, I contributed to research synthesis, brainstorming, concept refinement, and storyboarding. The affinity diagram and question journey map shown below are collaborative team outputs.' },
+      { heading: 'Quiet does not mean disengaged', body: 'Across the team’s research, participation included note-taking, private thinking, peer discussion, and after-class questions. Social exposure, limited thinking time, and the pace of a lecture could make asking a question difficult even when a student wanted clarification.' },
+      { heading: 'Four design requirements', body: 'Support different participation formats and timing; reduce social risk and preserve student control; create short, focused moments at natural breaks; and save confusing points in context for useful follow-up. These requirements guided our concepts rather than a target to maximize response counts.' },
+      { heading: 'Three alternatives, not one assumed solution', body: 'The team explored a question parking lot with proposed AI topic grouping, Canvas-integrated quick feedback and confidence ratings, and a think-pair-share system. Voting and SCAMPER helped us combine and refine ideas. These are design alternatives, not claims of a deployed Canvas integration or a working AI system.' },
+      { heading: 'What remains to be tested', body: 'The current materials document research, synthesis, concepts, and storyboards. Usability and classroom outcomes have not yet been established. The next step is to prototype and evaluate how well the concepts preserve privacy, fit lecture pacing, and help students return to unresolved questions.' }
+    ],
+    schematicImages: ['/projects/hci/affinity.png', '/projects/hci/journey-map.png', '/projects/hci/storyboard.jpg'],
+    imageCaptions: ['Team affinity diagram synthesizing classroom observations and interviews.', 'Team journey map: from noticing confusion to seeking help and resolving or losing a question.', 'Concept storyboard: private feedback and confidence ratings inform an instructor’s natural pause. Illustrative scenario, not an evaluated outcome.']
+  }
+];
+
 export const LARGE_PROJECTS: Project[] = [
   {
     id: 'l1',
@@ -98,6 +168,7 @@ export const LARGE_PROJECTS: Project[] = [
 ];
 
 export const MEDIUM_PROJECTS: Project[] = [
+  ...NEW_PROJECTS,
   {
     id: 'm1',
     title: "Finder",

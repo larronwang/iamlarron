@@ -1,6 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import { Project } from '../types';
 import { ArrowRight } from 'lucide-react';
+import { DEFAULT_PORTFOLIO_ZOOM, deckScale } from '../interactionLayout';
+import { useInteractiveViewport } from './useInteractiveViewport';
+import ZoomControls from './ZoomControls';
 
 interface Project3DDeckProps {
   projects: Project[];
@@ -17,7 +20,10 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
   featuredIds = [],
   className = ""
 }) => {
-  const deckId = useMemo(() => `deck-${Math.random().toString(36).substr(2, 9)}`, []);
+  const deckId = `deck-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewport = useInteractiveViewport(containerRef, DEFAULT_PORTFOLIO_ZOOM);
+  const scale = deckScale(viewport.width, viewport.height) * viewport.zoom;
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const seededRandom = (seed: number) => {
@@ -37,10 +43,14 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
     }
   };
 
-  const activePushDistance = getActivePushDistance();
+  const activePushDistance = getActivePushDistance() * scale;
 
   return (
-    <div className={`w-full ${className} flex justify-center`}>
+    <div ref={containerRef} className={`w-full h-full min-h-0 ${className} flex flex-col`}>
+      <div className="flex justify-end items-center gap-3 px-6 pb-2 shrink-0">
+        <span className="hidden sm:inline text-[9px] font-mono text-gray-400 uppercase tracking-widest">Ctrl / ⌘ + scroll</span>
+        <ZoomControls label="portfolio" {...viewport} />
+      </div>
       <style>{`
         .${deckId}-container {
            perspective: 1500px;
@@ -95,8 +105,8 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className={`${deckId}-container w-full overflow-x-auto overflow-y-visible no-scrollbar py-32 flex justify-center`}>
-        <div className="flex items-end px-12 pb-20 pt-12" style={{ transformStyle: 'preserve-3d' }}>
+      <div aria-label="Project gallery" className={`${deckId}-container w-full flex-1 min-h-0 overflow-auto no-scrollbar flex`}>
+        <div className="flex items-end px-6 sm:px-10 pb-4 pt-8 mx-auto min-h-full" style={{ transformStyle: 'preserve-3d' }}>
           {projects.map((project, index) => {
             const r1 = seededRandom(index * 7 + 1);
             const r2 = seededRandom(index * 3 + 2);
@@ -117,17 +127,17 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
             }
 
             const variance = 10;
-            const width = baseWidth + (r1 * variance * 2 - variance);
+            const width = (baseWidth + (r1 * variance * 2 - variance)) * scale;
             // Image is strictly square, but card container is taller to fit text below
             const imageHeight = width; 
-            const textHeight = 80;
+            const textHeight = 104;
             const totalHeight = imageHeight + textHeight;
 
             const baseRotY = 50 + (r2 * 5); 
             const baseRotX = (r3 * 4 - 2);
             const baseRotZ = (r1 * 2 - 1);
 
-            const marginLeft = index === 0 ? 0 : baseMargin;
+            const marginLeft = index === 0 ? 0 : baseMargin * scale;
 
             const isHovered = hoveredIndex === index;
             const isLeft = hoveredIndex !== null && index < hoveredIndex;
@@ -139,7 +149,7 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
 
             if (hoveredIndex !== null) {
               if (isHovered) {
-                transformString = `translateX(0px) rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.1) translateZ(180px)`;
+                transformString = `rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateZ(${24 * scale}px)`;
                 zIndex = 1000;
                 activeClass = 'active';
               } else if (isLeft) {
@@ -152,8 +162,19 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
             return (
               <div
                 key={project.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${project.title}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
+                onFocus={() => setHoveredIndex(index)}
+                onBlur={() => setHoveredIndex(null)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onProjectClick(project);
+                  }
+                }}
                 onClick={() => onProjectClick(project)}
                 className={`
                   ${deckId}-card ${activeClass}
@@ -166,6 +187,7 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
                    zIndex: zIndex,
                    marginLeft: `${marginLeft}px`,
                    transform: transformString,
+                   outlineOffset: '6px',
                 }}
               >
                 {/* Shadow logic attached to the bottom of the square image, not the whole container */}
@@ -180,6 +202,7 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
                   <img
                     src={project.imageUrl}
                     alt={project.title}
+                    draggable={false}
                     className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
                   />
                   
@@ -198,13 +221,13 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
                 >
                   <div className="flex justify-between items-start gap-3">
                     <div className="overflow-hidden">
-                      <p className="text-[10px] font-mono text-blue-500 mb-1 uppercase tracking-[0.2em]">
+                      <p className="font-mono text-blue-500 mb-1 uppercase tracking-[0.12em] line-clamp-2" style={{ fontSize: `${Math.max(7, 10 * scale)}px` }}>
                         {project.category}
                       </p>
-                      <h4 className={`text-black font-bold leading-tight tracking-tight ${project.displaySize === 'large' ? 'text-2xl' : 'text-base'}`}>
+                      <h4 className="text-black font-bold leading-tight tracking-tight line-clamp-2" style={{ fontSize: `${Math.max(11, (project.displaySize === 'large' ? 23 : 17) * scale)}px` }}>
                         {project.title}
                       </h4>
-                      <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-medium">
+                      <p className="text-gray-400 mt-1 uppercase tracking-wide font-medium line-clamp-2" style={{ fontSize: `${Math.max(7, 10 * scale)}px` }}>
                         {project.year} — {project.role}
                       </p>
                     </div>

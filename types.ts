@@ -16,6 +16,10 @@ export interface Project {
   downloadUrl?: string; // Optional download link
   externalUrl?: string; // Generic external link (e.g., "View", "Demo")
   externalUrlLabel?: string; // Label for the external link button
+  tools?: string[];
+  status?: string;
+  caseStudy?: { heading: string; body: string }[];
+  imageCaptions?: string[];
 }
 
 export type SectionId = 'home' | 'portfolio' | 'about' | 'contact';
