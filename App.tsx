@@ -134,21 +134,21 @@ const App: React.FC = () => {
         <Navbar />
 
         {/* Hero Section */}
-        <section id="home" className="h-screen w-full overflow-hidden bg-[#F5F5F7]">
+        <section id="home" className="h-[100svh] min-h-[360px] w-full overflow-hidden bg-[#F5F5F7]">
           <HeroCanvas />
         </section>
 
         {/* Portfolio Section */}
-        <section id="portfolio" className="h-screen w-full bg-gray-50 overflow-hidden relative flex flex-col justify-center">
+        <section id="portfolio" className="h-[100svh] min-h-[480px] w-full bg-gray-50 overflow-hidden relative flex flex-col pt-24 pb-4">
           <div className={`absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none transition-opacity duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`} />
           
-          <div className="container mx-auto px-6 relative z-10 mb-4">
+          <div className="container mx-auto px-6 relative z-10 mb-3 shrink-0">
             <div className="flex items-end justify-between border-b border-gray-200 pb-4">
                 <div>
-                  <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black mb-1">
+                  <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] leading-none font-bold tracking-tighter text-black mb-2">
                       WORK
                   </h2>
-                  <p className="text-xs font-mono text-gray-500 uppercase tracking-widest ml-1">
+                  <p className="text-[clamp(8px,0.85vw,11px)] font-mono text-gray-500 uppercase tracking-widest ml-1">
                       Selected Work (2023 — 2026)
                   </p>
                 </div>
@@ -161,7 +161,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="relative z-20 w-full mt-[-20px]">
+          <div className="relative z-20 w-full flex-1 min-h-0">
               <Project3DDeck 
                   projects={ALL_PROJECTS} 
                   onProjectClick={handleOpenProject}
