@@ -149,7 +149,7 @@ const App: React.FC = () => {
                       WORK
                   </h2>
                   <p className="text-xs font-mono text-gray-500 uppercase tracking-widest ml-1">
-                      Selected Archives (2022 — 2024)
+                      Selected Work (2023 — 2026)
                   </p>
                 </div>
                 <div className="hidden md:block text-right">
@@ -226,6 +226,7 @@ const App: React.FC = () => {
 
       {selectedProject && (
         <ProjectDetail 
+            key={selectedProject.id}
             project={selectedProject} 
             onClose={handleCloseProject}
             onNext={handleNextProject}

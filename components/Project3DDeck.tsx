@@ -95,8 +95,8 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className={`${deckId}-container w-full overflow-x-auto overflow-y-visible no-scrollbar py-32 flex justify-center`}>
-        <div className="flex items-end px-12 pb-20 pt-12" style={{ transformStyle: 'preserve-3d' }}>
+      <div aria-label="Project gallery" className={`${deckId}-container w-full overflow-x-auto overflow-y-visible no-scrollbar py-32 flex`}>
+        <div className="flex items-end px-12 pb-20 pt-12 mx-auto" style={{ transformStyle: 'preserve-3d' }}>
           {projects.map((project, index) => {
             const r1 = seededRandom(index * 7 + 1);
             const r2 = seededRandom(index * 3 + 2);
@@ -152,8 +152,19 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
             return (
               <div
                 key={project.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${project.title}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
+                onFocus={() => setHoveredIndex(index)}
+                onBlur={() => setHoveredIndex(null)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onProjectClick(project);
+                  }
+                }}
                 onClick={() => onProjectClick(project)}
                 className={`
                   ${deckId}-card ${activeClass}
@@ -180,6 +191,7 @@ const Project3DDeck: React.FC<Project3DDeckProps> = ({
                   <img
                     src={project.imageUrl}
                     alt={project.title}
+                    draggable={false}
                     className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
                   />
                   
