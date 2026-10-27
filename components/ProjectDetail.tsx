@@ -130,7 +130,17 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
       {/* Lightbox logic remains but icons scaled */}
       {(activePreviewUrl || previewIndex !== null) && (
         <div className="fixed inset-0 z-[3000] bg-black/95 flex flex-col items-center justify-center animate-in fade-in duration-300" onClick={() => { setActivePreviewUrl(null); setPreviewIndex(null); }}>
-          <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2">
+          <a
+            href={activePreviewUrl || project.schematicImages?.[previewIndex!]}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={event => event.stopPropagation()}
+            className="absolute top-6 left-6 inline-flex items-center gap-2 text-white/80 hover:text-white text-xs px-3 py-2 border border-white/30"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open original image
+          </a>
+          <button aria-label="Close image preview" className="absolute top-6 right-6 text-white/50 hover:text-white p-2">
             <X className="w-6 h-6 md:w-8 md:h-8" />
           </button>
           <div className="w-full h-full flex items-center justify-center p-6 md:p-12">
@@ -147,7 +157,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
             </div>
             <span className="uppercase tracking-widest text-[9px] font-bold hidden md:block">Back</span>
         </button>
-        <button onClick={onClose} className="p-1.5 md:p-2 hover:opacity-50 transition-opacity">
+        <button onClick={onClose} aria-label="Close project" className="p-1.5 md:p-2 hover:opacity-50 transition-opacity">
             <X className="w-5 h-5 md:w-6 md:h-6" />
         </button>
       </div>
@@ -156,14 +166,23 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
         
         {/* Proportional Header */}
         <div className="max-w-[90vw] md:max-w-7xl mx-auto px-4 pt-[15vh] pb-[10vh]">
-            <div className="flex flex-col md:flex-row gap-[6vw] items-center md:items-stretch">
-                <div className="w-full md:w-1/2 aspect-square max-h-[60vh] md:max-h-none overflow-hidden shadow-2xl border border-gray-100">
-                    <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover" />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[6vw] items-start">
+                <button
+                    type="button"
+                    onClick={() => setActivePreviewUrl(project.imageUrl)}
+                    aria-label={`Enlarge cover for ${project.title}`}
+                    className="relative group block w-full aspect-square overflow-hidden shadow-2xl border border-gray-100 cursor-zoom-in"
+                    style={{ aspectRatio: '1 / 1' }}
+                >
+                    <img src={project.imageUrl} alt={project.title} decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute bottom-4 right-4 bg-white/90 p-2 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                        <Maximize2 className="w-4 h-4" />
+                    </span>
+                </button>
                 
-                <div className="w-full md:w-1/2 flex flex-col justify-center">
+                <div className="w-full flex flex-col justify-center">
                     <div className="space-y-[2vh]">
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <span className="text-[9px] md:text-[10px] font-mono text-blue-600 uppercase tracking-[0.3em] font-bold">{project.category}</span>
                             <div className="h-[1px] w-6 bg-gray-200"></div>
                             <span className="text-[9px] md:text-[10px] font-mono text-gray-400 uppercase tracking-[0.3em]">{project.year}</span>
@@ -179,6 +198,13 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             {project.description}
                         </p>
 
+                        {project.status && <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500">{project.status}</p>}
+                        {project.tools && (
+                          <ul aria-label="Tools and methods" className="flex flex-wrap gap-2">
+                            {project.tools.map(tool => <li key={tool} className="border border-gray-200 px-3 py-1 text-[10px] text-gray-600">{tool}</li>)}
+                          </ul>
+                        )}
+
                         <div className="pt-[4vh] flex gap-[4vw] border-t border-gray-100">
                             <div>
                                 <h3 className="text-[8px] uppercase tracking-widest text-gray-400 font-bold mb-1">Role</h3>
@@ -191,6 +217,13 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                               </div>
                             )}
                         </div>
+                        {project.caseStudy && project.externalUrl && (
+                          <a href={project.externalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-6 py-4 bg-black text-white font-bold uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-colors w-fit">
+                            <ExternalLink className="w-4 h-4" />
+                            <span>{project.externalUrlLabel || 'View Project'}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </a>
+                        )}
                     </div>
                 </div>
             </div>
@@ -209,6 +242,20 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
         </div>
 
         {project.videoPosition === 'before' && <VideoShowcase />}
+
+        {project.caseStudy && (
+          <section aria-label="Project process" className="max-w-[85vw] md:max-w-6xl mx-auto py-[8vh]">
+            {project.caseStudy.map((section, index) => (
+              <div key={section.heading} className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 md:gap-16 py-10 border-b border-gray-100">
+                <div>
+                  <p className="font-mono text-[10px] text-blue-600 tracking-widest mb-3">0{index + 1}</p>
+                  <h2 className="font-bold text-xl md:text-2xl tracking-tight">{section.heading}</h2>
+                </div>
+                <p className="text-base md:text-lg font-light text-gray-600 leading-relaxed">{section.body}</p>
+              </div>
+            ))}
+          </section>
+        )}
 
         {/* Process Content - Proportional Grids */}
         <div className="w-full bg-white">
@@ -248,12 +295,20 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     </div>
                     <div className={`grid grid-cols-1 ${!isOnePerRow && project.schematicImages && project.schematicImages.length > 1 ? 'md:grid-cols-2' : ''} gap-[4vw] md:gap-[6vw] items-start`}>
                         {project.schematicImages?.map((url, i) => (
-                            <div key={i} onClick={() => setPreviewIndex(i)} className="relative w-full overflow-hidden border border-gray-100 cursor-zoom-in group">
-                                 <img src={url} className="w-full h-auto" alt={`Drawing ${i + 1}`} />
+                            <figure key={url} className="w-full">
+                              <button type="button" onClick={() => setPreviewIndex(i)} aria-label={`Enlarge ${project.imageCaptions?.[i] || `drawing ${i + 1}`}`} className="relative block w-full overflow-hidden border border-gray-100 cursor-zoom-in group">
+                                 <img src={url} loading="lazy" decoding="async" className="block mx-auto max-w-full h-auto" alt={project.imageCaptions?.[i] || `Drawing ${i + 1}`} />
                                  <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                       <span className="text-[8px] font-mono bg-black/80 text-white px-3 py-1.5 uppercase tracking-[0.2em]">Sheet. {i+1}</span>
                                  </div>
-                            </div>
+                              </button>
+                              <figcaption className="mt-4 flex flex-wrap items-start justify-between gap-3 text-xs text-gray-500 leading-relaxed">
+                                {project.imageCaptions?.[i] && <span>{project.imageCaptions[i]}</span>}
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 whitespace-nowrap underline underline-offset-4 hover:text-black">
+                                  View original <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </figcaption>
+                            </figure>
                         ))}
                     </div>
                 </div>

@@ -4,10 +4,85 @@ const LOREM_IPSUM = "This project explores the relationship between digital inte
 
 export const ABOUT_DATA = {
   title: "Human-centeredness matters — it sees people as they truly are, not as perfect models.",
-  description: "I am a designer skilled in cross-disciplinary thinking, with rich creativity and outstanding collaborative abilities. I create truly human-centered designs through media such as film, gaming, and architecture.",
+  description: "I am a Digital Media master's student at Georgia Tech with a background in architecture. I combine user research, visual storytelling, and coded prototypes to design interactive experiences across games, web interfaces, and VR/XR.",
   // You can change this URL to any image link you prefer
   imageUrl: "https://i.imgur.com/mzOlKIx.jpeg"
 };
+
+const NEW_PROJECTS: Project[] = [
+  {
+    id: 'l-same-table',
+    title: 'Same Table, Next Time?',
+    category: 'Expressive Computing · Course Project',
+    description: 'An interactive postcard about the memories, small talk, and unspoken feelings shared around a restaurant table.',
+    fullDescription: 'I think of eating together as an excuse for conversation and connection. In this p5.js narrative, one table stays in place as guests and their stories come and go: first a family celebrating a daughter’s next step, then the many lives suggested by an empty table.',
+    imageUrl: '/projects/same-table/cover-square-original.png',
+    year: 'Fall 2026',
+    role: 'Designer, Developer, Writer',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'p5.js', 'Illustration', 'Interactive Narrative'],
+    externalUrl: 'https://same-table-next-time.netlify.app',
+    externalUrlLabel: 'Experience the story',
+    caseStudy: [
+      { heading: 'Why a restaurant table?', body: 'My interest in cooking competitions and The Bear got me thinking about restaurants as more than places that serve food. Some of my most important memories happened around a dining table: family celebrations, reunions with old friends, and conversations about life-changing decisions. Sharing a meal can make a moment feel both comfortable and meaningful. Sometimes eating is just the excuse; the real point is the conversation and the time we spend together. That became the idea behind my postcard: people arrive, make memories, and leave, while the table stays for the next story.' },
+      { heading: 'A small family story', body: 'For the interactive narrative, I drew inspiration from Modern Family’s humor and warmth in ordinary family life. I wrote a short sitcom about Emma’s family celebrating her acceptance into college at a restaurant they often visit. Her parents are proud and beginning to feel her absence; her younger brother Max is more focused on taking over her room. Near the end, he changes his mind and says she can leave her things there. He never says he will miss her. I wanted the affection to stay understated, as it often does in real families: hidden in jokes, awkward pauses, and everyday sentences.' },
+      { heading: 'A postcard with two voices', body: 'The top half of the postcard holds the conversation everyone can hear. Hovering over or clicking a character changes the writing on the back to reveal their private thoughts and a handwritten signature, like a letter they wrote to someone at the table but never sent. Clicking or pressing Space advances the dialogue. These interactions let the audience see the same dinner from different perspectives without turning it into a branching plot. I also replaced the original stamp with a small cake illustration to connect the postcard to the meal.' },
+      { heading: 'Turning an illustration into an interaction', body: 'My main design challenge was making a static illustration interactive without losing its visual identity. I kept the top-down composition and stationary table, with blurred figures moving around it. I considered adding more animation, but too much movement would pull attention away from the conversations and weaken the contrast between the table and the busy restaurant. Using the postcard’s own writing area for the unsent letters became the breakthrough: it gave the interaction a narrative purpose without introducing a separate game interface.' },
+      { heading: 'Everyday traces as stories', body: 'ListeningCups: A Case of Data Tactility and Data Stories by Audrey Desjardins and Timea Tihanyi (2019) prompted me to think about ordinary objects and personal experience. A scratch on a table, a stain after dinner, a photograph, or a conversation can all feel like traces of someone’s life. My project does not use a dataset; instead, it uses interaction and visual storytelling to imagine a table as a container for memories and ask how many stories one place might hold.' },
+      { heading: 'A table after everyone leaves', body: 'After Emma’s family leaves, couples, friends, and other families appear around the same table in a quickening montage. The scenes end with an empty table: this family’s dinner mattered deeply to them, but it was only one ordinary evening in the restaurant. The final postcard exchange returns to the project’s central question: “Same table next time?” “Of course.” “How many times have we said that?” The waiter smiled. “Enough for the table to remember.” I wanted the audience to imagine all the other stories that happened there but were never told.' }
+    ],
+    schematicImages: ['/projects/same-table/postcard-original.png', '/projects/same-table/interactive-postcard.jpg'],
+    imageCaptions: ['The complete original postcard: restaurant illustration and the closing exchange that inspired the project.', 'Interactive p5.js postcard: the shared dinner above and the private writing space below.']
+  },
+  {
+    id: 'l-the-pass',
+    title: 'The Pass',
+    category: 'Independent Game Prototype',
+    description: 'Three tables. Two courses. Four minutes of hospitality.',
+    fullDescription: 'A browser-based 3D hospitality game about balancing the mechanics of service with the people at each table. Run the floor alone with an assisted kitchen, or share the service in local co-op.',
+    imageUrl: '/projects/the-pass/cover.jpg',
+    year: '2026 — Present',
+    role: 'Game Designer, Developer',
+    status: 'Playable prototype · In development',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'Three.js', 'Game Systems', 'Spatial Interaction'],
+    externalUrl: '/demos/the-pass.html',
+    externalUrlLabel: 'Play the browser prototype',
+    caseStudy: [
+      { heading: 'A complete service loop', body: 'Take orders, fire kitchen tickets, cook, collect plates at the pass, serve both courses, and clear the tables. The prototype compresses this loop into a four-minute service with three tables, making pacing and task order immediately visible.' },
+      { heading: 'Listening is a spatial choice', body: 'Guest conversations can only be heard nearby. Moving between kitchen tasks and tables determines which fragments of a conversation the player encounters, bringing environmental storytelling into the service loop.' },
+      { heading: 'Care alongside efficiency', body: 'Players can check in, pour water, and offer a small card. Guest-specific reviews respond to completed service, food quality, and pacing rather than rewarding repetitive gestures. Solo and same-keyboard co-op modes test different divisions of responsibility.' },
+      { heading: 'Prototype scope', body: 'This version uses primitive 3D geometry, fixed guests, and text dialogue to explore the core systems. It is an in-development prototype, not a finished commercial release; the demo requires a desktop browser with WebGL.' }
+    ],
+    schematicImages: ['/projects/the-pass/service.jpg'],
+    imageCaptions: ['The playable prototype: a shared restaurant floor, contextual service actions, and kitchen tickets.']
+  },
+  {
+    id: 'l-classroom',
+    title: 'Question Parking Lot',
+    category: 'Georgia Tech HCI · Group Project',
+    description: 'A place to park a question without stopping the class.',
+    fullDescription: 'A classroom feedback concept in which each question becomes a car. Students can quickly say whether they understand, submit a question privately, and return to it later. Related questions share a parking area, while an entrance traffic light helps the instructor decide when to pause and explain.',
+    imageUrl: '/projects/hci/question-parking-lot.png',
+    year: 'September 2026 — Present',
+    role: 'Research & Design Team Member',
+    status: 'MVP concept · In progress',
+    displaySize: 'medium',
+    tools: ['Observation', 'Interviews', 'Affinity Mapping', 'SCAMPER', 'Interaction Design'],
+    caseStudy: [
+      { heading: 'My contribution & the team process', body: 'I conducted two 30-minute classroom observations and two student interviews. As part of a four-person team, I contributed to research synthesis, brainstorming, concept refinement, and storyboarding. The affinity diagram and question journey map shown below are collaborative team outputs.' },
+      { heading: 'Quiet does not mean disengaged', body: 'Across the team’s research, participation included note-taking, private thinking, peer discussion, and after-class questions. Social exposure, limited thinking time, and the pace of a lecture could make asking a question difficult even when a student wanted clarification.' },
+      { heading: 'Four design requirements', body: 'Support different participation formats and timing; reduce social risk and preserve student control; create short, focused moments at natural breaks; and save confusing points in context for useful follow-up. These requirements guided our concepts rather than a target to maximize response counts.' },
+      { heading: 'Three alternatives, not one assumed solution', body: 'The team explored a question parking lot with proposed AI topic grouping, Canvas-integrated quick feedback and confidence ratings, and a think-pair-share system. Voting and SCAMPER helped us combine and refine ideas. These are design alternatives, not claims of a deployed Canvas integration or a working AI system.' },
+      { heading: 'The selected MVP: one question, one car', body: 'Our D2 direction combines the question parking lot with quick classroom feedback. After a key idea, students can choose “I understand” or “I have a question.” Choosing the latter opens a place to write privately, with a choice to submit anonymously or with a name. Each submitted question becomes a car; proposed AI categorization groups related cars into topic areas such as formulas, code steps, and technical terms.' },
+      { heading: 'When to park, when to pause', body: 'A few questions can wait in the lot for a natural break or follow-up after class. If red responses reach a selected threshold or outnumber green responses, the entrance light turns red and alerts the instructor to pause and clarify. The metaphor communicates both what is confusing and when a response may be needed. It represents shared feedback, not a ranking of students or proof of their learning.' },
+      { heading: 'From a sketch to a visual concept', body: 'The team’s early sketch establishes the parking spaces, arriving cars, and entrance signal. The new 2D concept image makes that direction more concrete, with topic areas, a selected question, anonymous submission, and the two feedback buttons. It is an AI-assisted illustration of the intended interface, not a screenshot of a working application.' },
+      { heading: 'What remains to be tested', body: 'The current materials document research, synthesis, concepts, and storyboards. Usability and classroom outcomes have not yet been established. The next step is an interactive prototype to test whether students understand the car metaphor, can control their visibility, and can find unanswered questions later; instructors also need to evaluate the timing of alerts and the usefulness of topic grouping.' }
+    ],
+    schematicImages: ['/projects/hci/question-parking-lot.png', '/projects/hci/parking-lot-sketch.jpg', '/projects/hci/affinity.png', '/projects/hci/journey-map.png', '/projects/hci/storyboard.jpg'],
+    imageCaptions: ['Question Parking Lot: a 2D MVP interface concept. AI-assisted illustration; not a deployed application.', 'The team’s original D2 sketch: questions arrive as cars and wait beside an entrance traffic signal.', 'Team affinity diagram synthesizing classroom observations and interviews.', 'Team journey map: from noticing confusion to seeking help and resolving or losing a question.', 'Earlier feedback-system storyboard: an illustrative scenario that informed the combined MVP, not an evaluated outcome.']
+  }
+];
 
 export const LARGE_PROJECTS: Project[] = [
   {
@@ -98,6 +173,7 @@ export const LARGE_PROJECTS: Project[] = [
 ];
 
 export const MEDIUM_PROJECTS: Project[] = [
+  ...NEW_PROJECTS,
   {
     id: 'm1',
     title: "Finder",
