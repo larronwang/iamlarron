@@ -130,6 +130,16 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
       {/* Lightbox logic remains but icons scaled */}
       {(activePreviewUrl || previewIndex !== null) && (
         <div className="fixed inset-0 z-[3000] bg-black/95 flex flex-col items-center justify-center animate-in fade-in duration-300" onClick={() => { setActivePreviewUrl(null); setPreviewIndex(null); }}>
+          <a
+            href={activePreviewUrl || project.schematicImages?.[previewIndex!]}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={event => event.stopPropagation()}
+            className="absolute top-6 left-6 inline-flex items-center gap-2 text-white/80 hover:text-white text-xs px-3 py-2 border border-white/30"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open original image
+          </a>
           <button aria-label="Close image preview" className="absolute top-6 right-6 text-white/50 hover:text-white p-2">
             <X className="w-6 h-6 md:w-8 md:h-8" />
           </button>
@@ -156,12 +166,21 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
         
         {/* Proportional Header */}
         <div className="max-w-[90vw] md:max-w-7xl mx-auto px-4 pt-[15vh] pb-[10vh]">
-            <div className="flex flex-col md:flex-row gap-[6vw] items-center md:items-stretch">
-                <div className="w-full md:w-1/2 aspect-square max-h-[60vh] md:max-h-none overflow-hidden shadow-2xl border border-gray-100">
-                    <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover" />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[6vw] items-start">
+                <button
+                    type="button"
+                    onClick={() => setActivePreviewUrl(project.imageUrl)}
+                    aria-label={`Enlarge cover for ${project.title}`}
+                    className="relative group block w-full aspect-square overflow-hidden shadow-2xl border border-gray-100 cursor-zoom-in"
+                    style={{ aspectRatio: '1 / 1' }}
+                >
+                    <img src={project.imageUrl} alt={project.title} decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute bottom-4 right-4 bg-white/90 p-2 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                        <Maximize2 className="w-4 h-4" />
+                    </span>
+                </button>
                 
-                <div className="w-full md:w-1/2 flex flex-col justify-center">
+                <div className="w-full flex flex-col justify-center">
                     <div className="space-y-[2vh]">
                         <div className="flex flex-wrap items-center gap-3">
                             <span className="text-[9px] md:text-[10px] font-mono text-blue-600 uppercase tracking-[0.3em] font-bold">{project.category}</span>
@@ -278,12 +297,17 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                         {project.schematicImages?.map((url, i) => (
                             <figure key={url} className="w-full">
                               <button type="button" onClick={() => setPreviewIndex(i)} aria-label={`Enlarge ${project.imageCaptions?.[i] || `drawing ${i + 1}`}`} className="relative block w-full overflow-hidden border border-gray-100 cursor-zoom-in group">
-                                 <img src={url} loading="lazy" className="w-full h-auto" alt={project.imageCaptions?.[i] || `Drawing ${i + 1}`} />
+                                 <img src={url} loading="lazy" decoding="async" className="block mx-auto max-w-full h-auto" alt={project.imageCaptions?.[i] || `Drawing ${i + 1}`} />
                                  <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                       <span className="text-[8px] font-mono bg-black/80 text-white px-3 py-1.5 uppercase tracking-[0.2em]">Sheet. {i+1}</span>
                                  </div>
                               </button>
-                              {project.imageCaptions?.[i] && <figcaption className="mt-4 text-xs text-gray-500 leading-relaxed">{project.imageCaptions[i]}</figcaption>}
+                              <figcaption className="mt-4 flex flex-wrap items-start justify-between gap-3 text-xs text-gray-500 leading-relaxed">
+                                {project.imageCaptions?.[i] && <span>{project.imageCaptions[i]}</span>}
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 whitespace-nowrap underline underline-offset-4 hover:text-black">
+                                  View original <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </figcaption>
                             </figure>
                         ))}
                     </div>

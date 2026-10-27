@@ -4,6 +4,16 @@
 
 # Run and deploy your AI Studio app
 
+## Current portfolio — October 27, 2026
+
+- Portfolio address: https://yiyangchewang.vercel.app/
+- This domain follows `codex/add-new-portfolio-projects`; updates to this branch refresh that address. The original `main` branch remains separate.
+- The current HCI entry is **Question Parking Lot**, with the selected D2 MVP, the team's original sketch, and research artifacts.
+- Same Table uses a square crop from the original illustration and the full-resolution original postcard PNG. Cover and gallery images can be enlarged and opened at their original resolution.
+- Contact email: **ywang4823@gatech.edu**. The site title, biography, and contact location reflect Yiyang Che Wang's Georgia Tech Digital Media studies in Atlanta.
+- The original 14 projects, three added projects, CHE. signature, responsive layout, and default home/gallery scales of 80%/70% are retained.
+
+
 This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/drive/12ukDR3ljm0gjsWite11KymGG2AppdaWv

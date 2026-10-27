@@ -9,11 +9,17 @@ This update adds Same Table, Next Time?, The Pass, and Classroom Participation t
 - Classroom Participation: author-provided HCI D1/D2 reports. Affinity diagram and journey map are team artifacts; the storyboard is a concept scenario. The entry separates personal fieldwork from collaborative work and does not claim deployed AI, Canvas integration, usability results, or learning outcomes.
 - Raw interview transcripts and full course PDFs are not published in this repository.
 
+## October 23 media and HCI update
+
+- Same Table uses a lossless square crop of the original dining illustration at its native 724 x 724 pixels. The full postcard is copied directly from the author's 1086 x 1448 PNG, without resizing or JPEG recompression. The detail hero keeps its square proportions independently of the text column, and images link to their original files.
+- Classroom Participation is now presented as Question Parking Lot, the selected combined D2 direction: quick green/red feedback, a question-to-car metaphor, proposed topic grouping, and an entrance traffic signal that tells the instructor when to pause.
+- The square parking-lot image is an approved AI-assisted interface concept, not a deployed application or a validated MVP. The original team sketch, affinity diagram, journey map, and earlier storyboard remain available as process artifacts. Full submissions and interview materials remain private.
+
 ## Existing issues outside this update
 
 During local verification, existing Imgur-hosted images did not load. New project media is hosted in `public/projects/`, but the original project's media service has not been replaced. Confirm old media availability before relying on the whole portfolio for applications.
 
-The original contact section still lists the existing Beijing contact details. It has intentionally not been changed as part of adding projects.
+The contact section now uses the author-requested Georgia Tech email, ywang4823@gatech.edu, and the author's current academic location in Atlanta.
 
 ## Checks
 

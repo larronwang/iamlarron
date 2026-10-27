@@ -19,7 +19,7 @@ const LoadingScreen: React.FC<{ progress: number; isFinished: boolean }> = ({ pr
     >
       <div className="relative flex flex-col items-center">
         <h1 className="text-2xl md:text-3xl font-black tracking-[0.5em] text-black mb-8 animate-pulse uppercase">
-          LARRONWANG
+          YIYANG CHE WANG
         </h1>
         <div className="w-48 h-[1px] bg-gray-200 relative overflow-hidden">
           <div 
@@ -202,7 +202,7 @@ const App: React.FC = () => {
               <p className="text-xl text-gray-500 mb-12">Welcome academic research and collaborations.</p>
               
               <a 
-                  href="https://mail.google.com/mail/?view=cm&fs=1&to=m13240921218@163.com" 
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=ywang4823@gatech.edu"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white rounded-none text-lg font-medium hover:bg-blue-600 transition-colors duration-300 shadow-xl"
@@ -213,14 +213,14 @@ const App: React.FC = () => {
 
               <div className="mt-24">
                   <p className="text-[10px] font-mono text-gray-400 uppercase tracking-[0.25em] leading-loose max-w-2xl mx-auto">
-                    YIYANG WANG TEL:+8613522922855 EMAIL:m13240921218@163.com BEIJING
+                    Atlanta, GA · Georgia Tech · ywang4823@gatech.edu
                   </p>
               </div>
           </div>
         </section>
 
         <footer className="py-8 bg-white border-t border-gray-100 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Yiyang Wang. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Yiyang Che Wang. All rights reserved.</p>
         </footer>
       </div>
 
