@@ -12,8 +12,9 @@ This update adds Same Table, Next Time?, The Pass, and Classroom Participation t
 ## October 23 media and HCI update
 
 - Same Table uses a lossless square crop of the original dining illustration at its native 724 x 724 pixels. The full postcard is copied directly from the author's 1086 x 1448 PNG, without resizing or JPEG recompression. The detail hero keeps its square proportions independently of the text column, and images link to their original files.
-- Classroom Participation is now presented as Question Parking Lot, the selected combined D2 direction: quick green/red feedback, a question-to-car metaphor, proposed topic grouping, and an entrance traffic signal that tells the instructor when to pause.
-- The square parking-lot image is an approved AI-assisted interface concept, not a deployed application or a validated MVP. The original team sketch, affinity diagram, journey map, and earlier storyboard remain available as process artifacts. Full submissions and interview materials remain private.
+- Question Parking Lot now reflects D3 (Nov 2026): students bookmark a lecture moment in one click, write the question after class, choose private / anonymous / named sharing, and each submitted question becomes a car grouped by topic. The D2 live red/green alert and traffic signal were dropped after interviews with five education professors. Two cognitive walkthroughs and two heuristic evaluations (Yiyang: HE-08 to HE-12) were run; think-aloud testing is next.
+- D3 screenshots (`public/projects/hci/d3-*.png`) are taken from the team's Figma prototype figures in the D3 report and use sample data.
+- The square parking-lot cover is the earlier D2 AI-assisted interface concept, not a deployed application or a validated MVP. The original team sketch, affinity diagram, journey map, and earlier storyboard remain available as process artifacts. Full submissions and interview materials remain private.
 
 ## Existing issues outside this update
 

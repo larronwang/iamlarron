@@ -57,7 +57,8 @@ test('HCI contribution, team attribution and unvalidated concepts are explicit',
   const text = hci.caseStudy.map(s => s.body).join(' ');
   assert.match(hci.status, /In progress/);
   assert.match(text, /two 30-minute classroom observations and two student interviews/);
-  assert.match(text, /collaborative team outputs/);
-  assert.match(text, /not claims of a deployed Canvas integration or a working AI system/);
-  assert.match(text, /outcomes have not yet been established/);
+  assert.match(text, /four-person team/);
+  assert.match(text, /built the Figma prototype together/);
+  assert.match(text, /sample data and scripted interactions; it is not a working classroom system/);
+  assert.match(text, /think-aloud sessions/);
 });
