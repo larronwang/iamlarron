@@ -224,6 +224,16 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             <ArrowRight className="w-3 h-3" />
                           </a>
                         )}
+                        {project.extraLinks && project.extraLinks.length > 0 && (
+                          <div className="flex flex-wrap gap-3">
+                            {project.extraLinks.map(link => (
+                              <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-6 py-4 border border-black text-black font-bold uppercase tracking-widest text-[10px] hover:bg-black hover:text-white transition-colors w-fit">
+                                <ExternalLink className="w-4 h-4" />
+                                <span>{link.label}</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
                     </div>
                 </div>
             </div>

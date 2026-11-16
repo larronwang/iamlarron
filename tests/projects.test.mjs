@@ -62,5 +62,7 @@ test('HCI contribution, team attribution and unvalidated concepts are explicit',
   assert.match(text, /sample data and scripted interactions; it is not a working classroom system/);
   assert.match(text, /think-aloud sessions/);
   assert.equal(hci.externalUrl, '/case-studies/question-parking-lot.html');
+  assert.equal(hci.extraLinks.map(l => l.label).join(' | '), 'Figma prototype · Student | Figma prototype · Instructor');
+  assert.ok(hci.extraLinks.every(l => l.url.startsWith('https://www.figma.com/proto/CQxlXj2BGaYYTSDvdYpBt9')));
   assert.ok(existsSync(resolve(root, 'public', hci.externalUrl.slice(1))));
 });

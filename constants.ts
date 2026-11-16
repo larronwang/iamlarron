@@ -71,6 +71,10 @@ const NEW_PROJECTS: Project[] = [
     tools: ['Observation', 'Interviews', 'Expert Interviews', 'Figma Prototyping', 'Service Blueprint', 'Heuristic Evaluation'],
     externalUrl: '/case-studies/question-parking-lot.html',
     externalUrlLabel: 'Read the full case study',
+    extraLinks: [
+      { label: 'Figma prototype · Student', url: 'https://www.figma.com/proto/CQxlXj2BGaYYTSDvdYpBt9?node-id=37-157&page-id=35%3A2071&starting-point-node-id=37%3A157&scaling=scale-down' },
+      { label: 'Figma prototype · Instructor', url: 'https://www.figma.com/proto/CQxlXj2BGaYYTSDvdYpBt9?node-id=53-717&page-id=35%3A2071&starting-point-node-id=53%3A717&scaling=scale-down' }
+    ],
     caseStudy: [
       { heading: 'My role', body: 'This was a four-person team project. I came up with the Question Parking Lot concept. In D1 I ran classroom observations and student interviews; in D2 I ran the brainstorming and wrote the proposal. After D2 I interviewed five education professors on my own, and for D3 I designed and built the whole Figma prototype: three hubs and about 40 overlays. I also ran one of the four evaluations, a heuristic review of lecture setup, checkpoint planning, the review reminder and the bookmark drawer. Teammates ran further D1 research, made the affinity diagram and journey map, and ran the other three evaluations.' },
       { heading: 'Quiet does not mean disengaged', body: 'Our classroom research found that participation included note-taking, private thinking, peer discussion, and questions after class. Students stayed quiet for three reasons: asking in front of others felt risky, they often knew they were lost before they could say where, and the lecture moved on before they could ask. In one observed class, the professor asked “Any questions?” and moved to the next slide almost at once. The goal was not more questions, but an easier way for students to ask and for instructors to respond.' },

@@ -16,6 +16,7 @@ export interface Project {
   downloadUrl?: string; // Optional download link
   externalUrl?: string; // Generic external link (e.g., "View", "Demo")
   externalUrlLabel?: string; // Label for the external link button
+  extraLinks?: { label: string; url: string }[]; // Further links shown under the main button (e.g. prototype entries)
   tools?: string[];
   status?: string;
   caseStudy?: { heading: string; body: string }[];
