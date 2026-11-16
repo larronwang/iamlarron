@@ -19,7 +19,7 @@ const LoadingScreen: React.FC<{ progress: number; isFinished: boolean }> = ({ pr
     >
       <div className="relative flex flex-col items-center">
         <h1 className="text-2xl md:text-3xl font-black tracking-[0.5em] text-black mb-8 animate-pulse uppercase">
-          LARRONWANG
+          YIYANG CHE WANG
         </h1>
         <div className="w-48 h-[1px] bg-gray-200 relative overflow-hidden">
           <div 
@@ -134,22 +134,22 @@ const App: React.FC = () => {
         <Navbar />
 
         {/* Hero Section */}
-        <section id="home" className="h-screen w-full overflow-hidden bg-[#F5F5F7]">
+        <section id="home" className="h-[100svh] min-h-[360px] w-full overflow-hidden bg-[#F5F5F7]">
           <HeroCanvas />
         </section>
 
         {/* Portfolio Section */}
-        <section id="portfolio" className="h-screen w-full bg-gray-50 overflow-hidden relative flex flex-col justify-center">
+        <section id="portfolio" className="h-[100svh] min-h-[480px] w-full bg-gray-50 overflow-hidden relative flex flex-col pt-24 pb-4">
           <div className={`absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none transition-opacity duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`} />
           
-          <div className="container mx-auto px-6 relative z-10 mb-4">
+          <div className="container mx-auto px-6 relative z-10 mb-3 shrink-0">
             <div className="flex items-end justify-between border-b border-gray-200 pb-4">
                 <div>
-                  <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black mb-1">
+                  <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] leading-none font-bold tracking-tighter text-black mb-2">
                       WORK
                   </h2>
-                  <p className="text-xs font-mono text-gray-500 uppercase tracking-widest ml-1">
-                      Selected Archives (2022 — 2024)
+                  <p className="text-[clamp(8px,0.85vw,11px)] font-mono text-gray-500 uppercase tracking-widest ml-1">
+                      Selected Work (2023 — 2026)
                   </p>
                 </div>
                 <div className="hidden md:block text-right">
@@ -161,7 +161,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="relative z-20 w-full mt-[-20px]">
+          <div className="relative z-20 w-full flex-1 min-h-0">
               <Project3DDeck 
                   projects={ALL_PROJECTS} 
                   onProjectClick={handleOpenProject}
@@ -202,7 +202,7 @@ const App: React.FC = () => {
               <p className="text-xl text-gray-500 mb-12">Welcome academic research and collaborations.</p>
               
               <a 
-                  href="https://mail.google.com/mail/?view=cm&fs=1&to=m13240921218@163.com" 
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=ywang4823@gatech.edu"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white rounded-none text-lg font-medium hover:bg-blue-600 transition-colors duration-300 shadow-xl"
@@ -213,19 +213,20 @@ const App: React.FC = () => {
 
               <div className="mt-24">
                   <p className="text-[10px] font-mono text-gray-400 uppercase tracking-[0.25em] leading-loose max-w-2xl mx-auto">
-                    YIYANG WANG TEL:+8613522922855 EMAIL:m13240921218@163.com BEIJING
+                    Atlanta, GA · Georgia Tech · ywang4823@gatech.edu
                   </p>
               </div>
           </div>
         </section>
 
         <footer className="py-8 bg-white border-t border-gray-100 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Yiyang Wang. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Yiyang Che Wang. All rights reserved.</p>
         </footer>
       </div>
 
       {selectedProject && (
         <ProjectDetail 
+            key={selectedProject.id}
             project={selectedProject} 
             onClose={handleCloseProject}
             onNext={handleNextProject}

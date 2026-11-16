@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { DEFAULT_HOME_ZOOM, HERO_NAME, HERO_WORDMARK, heroWordmarkLayout } from '../interactionLayout';
+import { useInteractiveViewport } from './useInteractiveViewport';
+import ZoomControls from './ZoomControls';
 
 const HeroCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const viewport = useInteractiveViewport(containerRef, DEFAULT_HOME_ZOOM);
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -15,13 +19,15 @@ const HeroCanvas: React.FC = () => {
     if (!ctx) return;
 
     let particles: Particle[] = [];
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let disposed = false;
     let dpr = 1;
     let width = 0;
     let height = 0;
     
     let mouse = { x: -9999, y: -9999, radius: 0 };
-    const BASE_GAP = 3; 
+    const BASE_GAP = 2;
+    const wordmark = new Image();
     
     class Particle {
       x: number;
@@ -60,8 +66,8 @@ const HeroCanvas: React.FC = () => {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance < mouse.radius) {
-            const forceDirectionX = dx / distance;
-            const forceDirectionY = dy / distance;
+            const forceDirectionX = dx / Math.max(distance, 0.001);
+            const forceDirectionY = dy / Math.max(distance, 0.001);
             const d = distance / mouse.radius;
             const force = Math.pow(1 - d, 2); 
             const variance = 0.5 + Math.random() * 1.5;
@@ -82,11 +88,11 @@ const HeroCanvas: React.FC = () => {
       }
     }
 
-    const init = () => {
+    const init = (artwork: HTMLImageElement | null) => {
       if (!canvas || !container || !ctx) return;
 
       particles = [];
-      dpr = window.devicePixelRatio || 1;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = container.getBoundingClientRect();
       width = Math.floor(rect.width * dpr);
       height = Math.floor(rect.height * dpr);
@@ -97,24 +103,24 @@ const HeroCanvas: React.FC = () => {
       canvas.height = height;
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
-      mouse.radius = 70 * dpr;
+      mouse.radius = Math.max(35, Math.min(rect.width * 0.06, 65)) * dpr;
 
       // Ensure background is filled immediately
       ctx.fillStyle = '#F5F5F7'; 
       ctx.fillRect(0, 0, width, height);
       
       ctx.fillStyle = '#1D1D1F';
-      const fontSize = Math.min(width / 5, 220 * dpr); 
-      const lineHeight = fontSize * 0.95; 
-      ctx.font = `900 ${fontSize}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      const totalTextHeight = lineHeight * 2;
-      const startY = (height - totalTextHeight) / 2 + (lineHeight / 2);
-
-      ctx.fillText("I'M", width / 2, startY);
-      ctx.fillText("LARRON", width / 2, startY + lineHeight);
+      const layout = heroWordmarkLayout(rect.width, rect.height, viewport.zoom);
+      if (artwork) {
+        ctx.drawImage(artwork, HERO_WORDMARK.x, HERO_WORDMARK.y, HERO_WORDMARK.width, HERO_WORDMARK.height,
+          layout.x * dpr, layout.y * dpr, layout.width * dpr, layout.height * dpr);
+      } else {
+        // A readable fallback keeps the home usable if the local artwork cannot load.
+        ctx.font = `italic 700 ${layout.height * dpr}px cursive`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(HERO_NAME, width / 2, rect.height * 0.46 * dpr, layout.width * dpr);
+      }
 
       const imageData = ctx.getImageData(0, 0, width, height);
       const data = imageData.data;
@@ -150,7 +156,6 @@ const HeroCanvas: React.FC = () => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    const handleResize = () => init();
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = (e.clientX - rect.left) * dpr;
@@ -158,35 +163,42 @@ const HeroCanvas: React.FC = () => {
     };
     const handleMouseLeave = () => { mouse.x = -9999; mouse.y = -9999; };
 
-    window.addEventListener('resize', handleResize);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', handleMouseLeave);
 
     // Immediate background fill to prevent any empty frame
     const initialRect = container.getBoundingClientRect();
     if (initialRect.width > 0) {
-        canvas.width = initialRect.width * (window.devicePixelRatio || 1);
-        canvas.height = initialRect.height * (window.devicePixelRatio || 1);
+        canvas.width = initialRect.width * Math.min(window.devicePixelRatio || 1, 2);
+        canvas.height = initialRect.height * Math.min(window.devicePixelRatio || 1, 2);
         ctx.fillStyle = '#F5F5F7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    document.fonts.ready.then(() => {
-        init();
-        animate();
-    });
+    const start = (artwork: HTMLImageElement | null) => {
+      if (disposed) return;
+      init(artwork);
+      animate();
+    };
+    wordmark.onload = () => start(wordmark);
+    wordmark.onerror = () => start(null);
+    wordmark.src = HERO_WORDMARK.src;
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      disposed = true;
+      wordmark.onload = null;
+      wordmark.onerror = null;
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [viewport.width, viewport.height, viewport.zoom]);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-[#F5F5F7] relative select-none overflow-hidden">
+    <div ref={containerRef} aria-label="Interactive CHE. signature" className="w-full h-full bg-[#F5F5F7] relative select-none overflow-hidden">
+      <h1 className="sr-only">{HERO_NAME} — Yiyang Che Wang</h1>
       <canvas 
+        aria-hidden="true"
         ref={canvasRef} 
         className={`block w-full h-full transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
       />
@@ -194,16 +206,20 @@ const HeroCanvas: React.FC = () => {
       {/* Texture with solid backdrop visibility */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.4] bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] mix-blend-multiply"></div>
       
-      <div className={`absolute bottom-28 w-full text-center pointer-events-none transition-all duration-1000 delay-300 ${isReady ? 'opacity-70 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <p className="text-[11px] md:text-sm font-semibold tracking-[0.25em] text-gray-400 uppercase">
+      <div className={`absolute bottom-28 w-full px-6 text-center pointer-events-none transition-all duration-1000 delay-300 ${isReady ? 'opacity-70 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <p className="text-[clamp(8px,0.9vw,11px)] font-semibold tracking-[0.2em] text-gray-400 uppercase">
             Always pursuing human-centric design
           </p>
       </div>
 
-      <div className={`absolute bottom-12 w-full text-center pointer-events-none transition-opacity duration-1000 delay-500 ${isReady ? 'opacity-40' : 'opacity-0'}`}>
+      <div className={`absolute bottom-5 sm:bottom-8 left-6 pointer-events-none transition-opacity duration-1000 delay-500 ${isReady ? 'opacity-50' : 'opacity-0'}`}>
           <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-gray-400">
              Scroll to Explore
           </span>
+      </div>
+      <div className="absolute bottom-3 sm:bottom-5 right-4 sm:right-6 flex items-center gap-3">
+        <span className="hidden sm:inline font-mono text-[9px] uppercase tracking-widest text-gray-400">Ctrl / ⌘ + scroll</span>
+        <ZoomControls label="home" {...viewport} />
       </div>
     </div>
   );

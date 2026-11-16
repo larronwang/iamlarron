@@ -4,10 +4,92 @@ const LOREM_IPSUM = "This project explores the relationship between digital inte
 
 export const ABOUT_DATA = {
   title: "Human-centeredness matters — it sees people as they truly are, not as perfect models.",
-  description: "I am a designer skilled in cross-disciplinary thinking, with rich creativity and outstanding collaborative abilities. I create truly human-centered designs through media such as film, gaming, and architecture.",
+  description: "I am a Digital Media master's student at Georgia Tech with a background in architecture. I combine user research, visual storytelling, and coded prototypes to design interactive experiences across games, web interfaces, and VR/XR.",
   // You can change this URL to any image link you prefer
   imageUrl: "https://i.imgur.com/mzOlKIx.jpeg"
 };
+
+const NEW_PROJECTS: Project[] = [
+  {
+    id: 'l-same-table',
+    title: 'Same Table, Next Time?',
+    category: 'Expressive Computing · Course Project',
+    description: 'An interactive postcard about the memories, small talk, and unspoken feelings shared around a restaurant table.',
+    fullDescription: 'I think of eating together as an excuse for conversation and connection. In this p5.js narrative, one table stays in place as guests and their stories come and go: first a family celebrating a daughter’s next step, then the many lives suggested by an empty table.',
+    imageUrl: '/projects/same-table/cover-square-original.png',
+    year: 'Fall 2026',
+    role: 'Designer, Developer, Writer',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'p5.js', 'Illustration', 'Interactive Narrative'],
+    externalUrl: 'https://same-table-next-time.netlify.app',
+    externalUrlLabel: 'Experience the story',
+    caseStudy: [
+      { heading: 'Why a restaurant table?', body: 'My interest in cooking competitions and The Bear got me thinking about restaurants as more than places that serve food. Some of my most important memories happened around a dining table: family celebrations, reunions with old friends, and conversations about life-changing decisions. Sharing a meal can make a moment feel both comfortable and meaningful. Sometimes eating is just the excuse; the real point is the conversation and the time we spend together. That became the idea behind my postcard: people arrive, make memories, and leave, while the table stays for the next story.' },
+      { heading: 'A small family story', body: 'For the interactive narrative, I drew inspiration from Modern Family’s humor and warmth in ordinary family life. I wrote a short sitcom about Emma’s family celebrating her acceptance into college at a restaurant they often visit. Her parents are proud and beginning to feel her absence; her younger brother Max is more focused on taking over her room. Near the end, he changes his mind and says she can leave her things there. He never says he will miss her. I wanted the affection to stay understated, as it often does in real families: hidden in jokes, awkward pauses, and everyday sentences.' },
+      { heading: 'A postcard with two voices', body: 'The top half of the postcard holds the conversation everyone can hear. Hovering over or clicking a character changes the writing on the back to reveal their private thoughts and a handwritten signature, like a letter they wrote to someone at the table but never sent. Clicking or pressing Space advances the dialogue. These interactions let the audience see the same dinner from different perspectives without turning it into a branching plot. I also replaced the original stamp with a small cake illustration to connect the postcard to the meal.' },
+      { heading: 'Turning an illustration into an interaction', body: 'My main design challenge was making a static illustration interactive without losing its visual identity. I kept the top-down composition and stationary table, with blurred figures moving around it. I considered adding more animation, but too much movement would pull attention away from the conversations and weaken the contrast between the table and the busy restaurant. Using the postcard’s own writing area for the unsent letters became the breakthrough: it gave the interaction a narrative purpose without introducing a separate game interface.' },
+      { heading: 'Everyday traces as stories', body: 'ListeningCups: A Case of Data Tactility and Data Stories by Audrey Desjardins and Timea Tihanyi (2019) prompted me to think about ordinary objects and personal experience. A scratch on a table, a stain after dinner, a photograph, or a conversation can all feel like traces of someone’s life. My project does not use a dataset; instead, it uses interaction and visual storytelling to imagine a table as a container for memories and ask how many stories one place might hold.' },
+      { heading: 'A table after everyone leaves', body: 'After Emma’s family leaves, couples, friends, and other families appear around the same table in a quickening montage. The scenes end with an empty table: this family’s dinner mattered deeply to them, but it was only one ordinary evening in the restaurant. The final postcard exchange returns to the project’s central question: “Same table next time?” “Of course.” “How many times have we said that?” The waiter smiled. “Enough for the table to remember.” I wanted the audience to imagine all the other stories that happened there but were never told.' }
+    ],
+    schematicImages: ['/projects/same-table/postcard-original.png', '/projects/same-table/interactive-postcard.jpg'],
+    imageCaptions: ['The complete original postcard: restaurant illustration and the closing exchange that inspired the project.', 'Interactive p5.js postcard: the shared dinner above and the private writing space below.']
+  },
+  {
+    id: 'l-the-pass',
+    title: 'The Pass',
+    category: 'Independent Game Prototype',
+    description: 'Three tables. Two courses. Four minutes of hospitality.',
+    fullDescription: 'A browser-based 3D hospitality game about balancing the mechanics of service with the people at each table. Run the floor alone with an assisted kitchen, or share the service in local co-op.',
+    imageUrl: '/projects/the-pass/cover.jpg',
+    year: '2026 — Present',
+    role: 'Game Designer, Developer',
+    status: 'Playable prototype · In development',
+    displaySize: 'medium',
+    tools: ['JavaScript', 'Three.js', 'Game Systems', 'Spatial Interaction'],
+    externalUrl: '/demos/the-pass.html',
+    externalUrlLabel: 'Play the browser prototype',
+    caseStudy: [
+      { heading: 'A complete service loop', body: 'Take orders, fire kitchen tickets, cook, collect plates at the pass, serve both courses, and clear the tables. The prototype compresses this loop into a four-minute service with three tables, making pacing and task order immediately visible.' },
+      { heading: 'Listening is a spatial choice', body: 'Guest conversations can only be heard nearby. Moving between kitchen tasks and tables determines which fragments of a conversation the player encounters, bringing environmental storytelling into the service loop.' },
+      { heading: 'Care alongside efficiency', body: 'Players can check in, pour water, and offer a small card. Guest-specific reviews respond to completed service, food quality, and pacing rather than rewarding repetitive gestures. Solo and same-keyboard co-op modes test different divisions of responsibility.' },
+      { heading: 'Prototype scope', body: 'This version uses primitive 3D geometry, fixed guests, and text dialogue to explore the core systems. It is an in-development prototype, not a finished commercial release; the demo requires a desktop browser with WebGL.' }
+    ],
+    schematicImages: ['/projects/the-pass/service.jpg'],
+    imageCaptions: ['The playable prototype: a shared restaurant floor, contextual service actions, and kitchen tickets.']
+  },
+  {
+    id: 'l-classroom',
+    title: 'Question Parking Lot',
+    category: 'Georgia Tech CS 6750 HCI · Group Project',
+    description: 'Bookmark a confusing moment now. Ask about it when you are ready.',
+    fullDescription: 'A classroom tool for questions students do not ask in the moment. During a lecture, one click saves the current slide and time. After class, students return to that moment, write a question when they can say what they need, and choose to keep it private, share it anonymously, or share it with their name. Each shared question becomes a car in a parking lot sorted by topic, where the instructor reviews the questions and publishes a response. I came up with the concept, interviewed five education professors, and designed and built the Figma prototype.',
+    imageUrl: '/projects/hci/cover-d3-parking-lot.png',
+    year: 'September 2026 — Present',
+    role: 'Concept, Research & Prototype Lead',
+    status: 'Low-fidelity prototype · Evaluated · In progress',
+    displaySize: 'medium',
+    tools: ['Observation', 'Interviews', 'Expert Interviews', 'Figma Prototyping', 'Service Blueprint', 'Heuristic Evaluation'],
+    externalUrl: '/case-studies/question-parking-lot.html',
+    externalUrlLabel: 'Read the full case study',
+    extraLinks: [
+      { label: 'Figma prototype · Student', url: 'https://www.figma.com/proto/CQxlXj2BGaYYTSDvdYpBt9?node-id=37-157&page-id=35%3A2071&starting-point-node-id=37%3A157&scaling=scale-down' },
+      { label: 'Figma prototype · Instructor', url: 'https://www.figma.com/proto/CQxlXj2BGaYYTSDvdYpBt9?node-id=53-717&page-id=35%3A2071&starting-point-node-id=53%3A717&scaling=scale-down' }
+    ],
+    caseStudy: [
+      { heading: 'My role', body: 'This was a four-person team project. I came up with the Question Parking Lot concept. In D1 I ran classroom observations and student interviews; in D2 I ran the brainstorming and wrote the proposal. After D2 I interviewed five education professors on my own, and for D3 I designed and built the whole Figma prototype: three hubs and about 40 overlays. I also ran one of the four evaluations, a heuristic review of lecture setup, checkpoint planning, the review reminder and the bookmark drawer. Teammates ran further D1 research, made the affinity diagram and journey map, and ran the other three evaluations.' },
+      { heading: 'Quiet does not mean disengaged', body: 'Our classroom research found that participation included note-taking, private thinking, peer discussion, and questions after class. Students stayed quiet for three reasons: asking in front of others felt risky, they often knew they were lost before they could say where, and the lecture moved on before they could ask. In one observed class, the professor asked “Any questions?” and moved to the next slide almost at once. The goal was not more questions, but an easier way for students to ask and for instructors to respond.' },
+      { heading: 'What the professors told me', body: 'Our D2 concept asked students to tap “I understand” or “I have a question” during class, with a traffic light that alerted the instructor when confusion passed a threshold. I then interviewed five education professors. An educational psychologist framed engagement around competence, value, belonging and autonomy, and pointed out that students often cannot form a question in the moment, that questions saved for later are forgotten unless review is part of the course, and that students stop using a tool if nothing visibly happens. I traced each recommendation to a screen before building, and deferred a few that needed usability results first.' },
+      { heading: 'Save now, ask later', body: 'D3 separates capture from asking. During class, “Bookmark this moment” saves the slide and time with one click and no typing. At the end of class, a reminder shows how many moments were saved and roughly how long review will take. Students then pick the kind of help they need, draft the question with optional AI help that never replaces their wording, and only then choose who can see it. The live red/green alert was removed; instead the instructor plans short checkpoints and decides when to pause.' },
+      { heading: 'Who can see this question?', body: 'Every sharing option is described by what the instructor and classmates will actually see. A private draft stays with the student and creates no car. An anonymous question shows the instructor the question and slide but not the name; a named question shows the name to the instructor only. Classmates see topic totals and statuses, never the text. Instructors see bookmarks only as opt-in counts in a time window, never one student’s timestamps.' },
+      { heading: 'The instructor stays in control', body: 'Instructors prepare the lecture with one or two labeled example questions, so no student has to post first, and plan checkpoints at slide boundaries. After class they see bookmarks, questions and topics as separate counts, not comprehension scores. They review AI-suggested groups beside the students’ original wording, edit or split them, and preview a reply before publishing it. Students then see Answered, but only the student can mark a question resolved, after choosing a next step such as practice, another example, or office hours.' },
+      { heading: 'Building and checking the prototype', body: 'I built the prototype from a 16-screen specification as three 1440 × 900 hubs with overlays, so no flow leaves its workspace, plus launcher buttons that reset the state for each of five test tasks. Before evaluation I checked the build against the specification and fixed six issues, including a review prompt that never appeared and example questions that duplicated real student questions.' },
+      { heading: 'What the evaluation found', body: 'The team ran two cognitive walkthroughs and two heuristic evaluations and ranked 17 findings on Nielsen’s 0–4 scale. One-click bookmarking and the privacy screen held up. The most serious problem came after an action: confirmations such as “Saved privately” fell below the visible area, and neither students nor instructors were told who would see what they had just shared. My review found that lecture setup did not show whether a checkpoint was scheduled, that “Remind me later” did not say where to resume, and that bookmark cards did not show who could see a linked question.' },
+      { heading: 'What comes next', body: 'Labels and confirmations will be fixed first: receipts in view that name the audience, a text list of each student’s own questions beside the lot, and one vocabulary for private drafts and help types. The parking metaphor, the role of AI and anonymous sharing as the default will not change until think-aloud sessions with four to five graduate students and a review-and-respond walkthrough with a TA or instructor. The prototype uses sample data and scripted interactions; it is not a working classroom system.' }
+    ],
+    schematicImages: ['/projects/hci/d3-parking-lot.png', '/projects/hci/d3-fig-blueprint.png', '/projects/hci/d3-fig-expert-trace.png', '/projects/hci/d3-fig-d2-vs-d3.png', '/projects/hci/d3-fig-student-flow.png', '/projects/hci/d3-fig-question-states.png', '/projects/hci/d3-fig-privacy.png', '/projects/hci/d3-privacy-choice.png', '/projects/hci/d3-fig-instructor-flow.png', '/projects/hci/d3-instructor-review.png', '/projects/hci/d3-fig-findings.png', '/projects/hci/d3-lecture-bookmark.png', '/projects/hci/d3-bookmarks-drawer.png', '/projects/hci/d3-learning-check.png', '/projects/hci/affinity.png', '/projects/hci/journey-map.png'],
+    imageCaptions: ['After class: each shared question is a car, grouped by topic. The student’s own car is outlined; example questions are marked and not counted. Figma prototype with sample data.', 'Service blueprint: what the student, the system and the instructor do from before class to after the reply.', 'Each recommendation from the professors traced to the screen that answers it.', 'What changed between the D2 concept and the D3 prototype.', 'Student flow: one click during class; writing, sharing and follow-up after class.', 'The life of a question. Answered means a reply exists; only the student can mark it resolved.', 'Who sees what for each sharing choice.', 'The sharing screen: each option explains what the instructor and classmates will see.', 'Instructor flow, from lecture setup to a published reply, with sample data.', 'Instructor review: an editable AI-suggested summary beside the students’ original questions.', 'Evaluation findings ranked on Nielsen’s 0–4 severity scale. Yellow rows come from my heuristic review.', 'During class: one click on “Bookmark this moment” saves the slide and time.', 'The end-of-class review reminder and My Bookmarks.', 'After a reply, students choose a next step. Reading an answer does not resolve the question.', 'Team affinity diagram synthesizing D1 observations and interviews.', 'Team journey map: from noticing confusion to resolving or losing a question.']
+  }
+];
 
 export const LARGE_PROJECTS: Project[] = [
   {
@@ -98,6 +180,7 @@ export const LARGE_PROJECTS: Project[] = [
 ];
 
 export const MEDIUM_PROJECTS: Project[] = [
+  ...NEW_PROJECTS,
   {
     id: 'm1',
     title: "Finder",
