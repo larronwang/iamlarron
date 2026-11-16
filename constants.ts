@@ -63,7 +63,7 @@ const NEW_PROJECTS: Project[] = [
     category: 'Georgia Tech CS 6750 HCI · Group Project',
     description: 'Bookmark a confusing moment now. Ask about it when you are ready.',
     fullDescription: 'A classroom tool for questions students do not ask in the moment. During a lecture, one click saves the current slide and time. After class, students return to that moment, write a question when they can say what they need, and choose to keep it private, share it anonymously, or share it with their name. Each shared question becomes a car in a parking lot sorted by topic, where the instructor reviews the questions and publishes a response. I came up with the concept, interviewed five education professors, and designed and built the Figma prototype.',
-    imageUrl: '/projects/hci/question-parking-lot.png',
+    imageUrl: '/projects/hci/cover-d3-parking-lot.png',
     year: 'September 2026 — Present',
     role: 'Concept, Research & Prototype Lead',
     status: 'Low-fidelity prototype · Evaluated · In progress',
