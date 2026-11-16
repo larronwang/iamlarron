@@ -56,9 +56,11 @@ test('HCI contribution, team attribution and unvalidated concepts are explicit',
   const hci = ALL_PROJECTS.find(p => p.id === 'l-classroom');
   const text = hci.caseStudy.map(s => s.body).join(' ');
   assert.match(hci.status, /In progress/);
-  assert.match(text, /two 30-minute classroom observations and two student interviews/);
-  assert.match(text, /four-person team/);
-  assert.match(text, /built the Figma prototype together/);
+  assert.match(text, /four-person team project/);
+  assert.match(text, /designed and built the whole Figma prototype/);
+  assert.match(text, /Teammates ran/);
   assert.match(text, /sample data and scripted interactions; it is not a working classroom system/);
   assert.match(text, /think-aloud sessions/);
+  assert.equal(hci.externalUrl, '/case-studies/question-parking-lot.html');
+  assert.ok(existsSync(resolve(root, 'public', hci.externalUrl.slice(1))));
 });

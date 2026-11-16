@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Question Parking Lot: an HCI case study by Yiyang Che Wang. Bookmark a confusing lecture moment, ask about it after class.">
+<title>Question Parking Lot Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an asphalt hero with painted lettering, then a quiet light case-study column where each figure sits in its own numbered plate. */
+:root{
+  --bg:#EDEFF2; --surface:#FFFFFF; --band:#E3E6EB; --ink:#1E222A; --muted:#5B6370; --line:#C6CBD3;
+  --asphalt:#353942; --asphalt-ink:#E9EBEE; --paint:#F2C230; --paint-ink:#1E222A;
+  --ok:#2C63C4; --warn:#B7791F; --bad:#C2453A; --me:#F2C230;
+  --f-display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#181B20; --surface:#22262D; --band:#1E2228; --ink:#E8EAEE; --muted:#9EA6B2; --line:#383E48;
+  --asphalt:#111317; --asphalt-ink:#E9EBEE; --ok:#6E9BEA; --warn:#E0A445; --bad:#E5685C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#181B20; --surface:#22262D; --band:#1E2228; --ink:#E8EAEE; --muted:#9EA6B2; --line:#383E48;
+  --asphalt:#111317; --asphalt-ink:#E9EBEE; --ok:#6E9BEA; --warn:#E0A445; --bad:#E5685C; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.05}
+p{margin:0}
+.eyebrow{font-family:var(--f-display);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Hero */
+.hero{background:var(--asphalt);color:var(--asphalt-ink);position:relative;overflow:hidden}
+.hero .wrap{padding-block:56px 48px;display:grid;gap:28px}
+.hero .eyebrow{color:#AEB4BE}
+.hero h1{font-size:clamp(56px,10vw,128px);font-weight:700;text-transform:uppercase;color:var(--paint);letter-spacing:.01em}
+.hero .lede{font-size:clamp(18px,2.2vw,22px);max-width:40ch;color:var(--asphalt-ink)}
+.lane{height:4px;background:repeating-linear-gradient(90deg,#8A909B 0 36px,transparent 36px 64px);opacity:.7}
+.bays{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-left:3px solid var(--paint)}
+.bay{border-right:3px solid var(--paint);padding:10px 16px 12px;min-width:0}
+.bay b{display:block;font-family:var(--f-display);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#AEB4BE;font-weight:600}
+.bay span{font-size:15px}
+
+main .wrap{display:grid;gap:72px;padding-block:56px 96px}
+section{display:grid;gap:24px}
+.sec-head{display:grid;gap:10px;max-width:68ch}
+.sec-head h2{font-size:clamp(34px,5vw,48px);font-weight:700;text-transform:uppercase}
+.sec-head p{color:var(--muted)}
+
+.plate{background:var(--surface);border:1px solid var(--line);border-radius:4px;display:grid;min-width:0}
+.plate-top{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;padding:14px 20px;border-bottom:1px solid var(--line)}
+.fig{font-family:var(--f-mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.plate-top h3{font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.plate-body{padding:20px;min-width:0}
+.plate-note{padding:12px 20px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.scroll{overflow-x:auto}
+.scroll svg{display:block;min-width:760px;width:100%;height:auto}
+
+/* SVG diagram tokens */
+.d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.3}
+.d-band{fill:var(--band)}
+.d-key{fill:var(--paint);stroke:var(--paint)}
+.d-ghost{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.d-ring{fill:var(--surface);stroke:var(--paint);stroke-width:3}
+.d-okbox{fill:var(--surface);stroke:var(--ok);stroke-width:2}
+.d-inkbox{fill:var(--ink);stroke:var(--ink)}
+.d-t{fill:var(--ink);font:600 14px var(--f-body)}
+.d-s{fill:var(--muted);font:400 12px var(--f-body)}
+.d-tk{fill:var(--paint-ink);font:600 14px var(--f-body)}
+.d-sk{fill:var(--paint-ink);font:400 12px var(--f-body);opacity:.8}
+.d-tinv{fill:var(--bg);font:600 14px var(--f-body)}
+.d-lbl{fill:var(--muted);font:600 13px var(--f-display);letter-spacing:.1em}
+.d-edge{fill:var(--muted);font:500 11.5px var(--f-body)}
+.d-line{stroke:var(--muted);stroke-width:1.4;fill:none}
+.d-dash{stroke-dasharray:5 4}
+.d-arrow{fill:var(--muted)}
+.d-sep{stroke:var(--line);stroke-width:1;fill:none}
+
+/* Generic grids */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.card{border:1px solid var(--line);border-radius:4px;padding:16px;display:grid;gap:6px;align-content:start;min-width:0;background:var(--surface)}
+.card h4{margin:0;font-size:16px}
+.card p{font-size:14.5px;color:var(--muted)}
+.tag{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* Contribution */
+.contrib{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.contrib > div{padding:20px;display:grid;gap:8px;align-content:start;min-width:0}
+.contrib > div + div{border-left:1px solid var(--line)}
+@media (max-width:700px){.contrib > div + div{border-left:0;border-top:1px solid var(--line)}}
+.contrib ul{margin:0;padding-left:18px;font-size:15px}
+.contrib li{margin:4px 0}
+.mine{display:inline-block;background:var(--paint);color:var(--paint-ink);font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:1px 7px;border-radius:2px;vertical-align:2px}
+
+/* Barriers */
+.barriers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.barrier{border-top:3px solid var(--ink);padding-top:12px;display:grid;gap:6px}
+.barrier .big{font-family:var(--f-display);font-size:28px;font-weight:700;text-transform:uppercase;line-height:1}
+.barrier p{color:var(--muted);font-size:15px}
+.factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line)}
+.factor{padding:16px;display:grid;gap:4px;min-width:0}
+.factor:nth-child(odd){border-right:1px solid var(--line)}
+.factor:nth-child(-n+2){border-bottom:1px solid var(--line)}
+.factor b{font-family:var(--f-display);font-size:22px;text-transform:uppercase;letter-spacing:.03em}
+.factor i{font-style:normal;color:var(--muted);font-size:14.5px}
+.factor span{font-size:14px}
+
+/* Evolution */
+.evo{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.3fr) 28px minmax(0,1.3fr);border:1px solid var(--line);font-size:15px}
+.evo > div{padding:12px 14px;border-bottom:1px solid var(--line);min-width:0}
+.evo .h{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted);background:var(--band)}
+.evo .k{font-weight:600}
+.evo .old{color:var(--muted)}
+.evo .old s{text-decoration-color:var(--bad)}
+.evo .arr{display:grid;place-items:center;color:var(--muted);padding:0}
+.evo .new{font-weight:500}
+.evo > div:nth-last-child(-n+4){border-bottom:0}
+@media (max-width:640px){
+  .evo{grid-template-columns:1fr}
+  .evo .h:not(:first-child),.evo .arr{display:none}
+  .evo .k{background:var(--band)}
+  .evo .old::before{content:"D2 · ";font-family:var(--f-mono);font-size:12px}
+  .evo .new::before{content:"D3 · ";font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.tl{padding:14px 16px;display:grid;gap:4px;min-width:0;position:relative}
+.tl + .tl{border-left:1px solid var(--line)}
+.tl .when{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.tl b{font-family:var(--f-display);font-size:20px;text-transform:uppercase}
+.tl p{font-size:14px;color:var(--muted)}
+.tl.now{background:var(--paint);color:var(--paint-ink)}
+.tl.now p,.tl.now .when{color:var(--paint-ink);opacity:.85}
+@media (max-width:820px){.tl + .tl{border-left:0;border-top:1px solid var(--line)}}
+
+/* Annotated lot */
+.anno{position:relative;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.anno img{display:block;width:100%;height:auto}
+.pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:var(--paint);color:var(--paint-ink);font:700 14px var(--f-mono);display:grid;place-items:center;box-shadow:0 0 0 3px rgba(20,22,26,.55)}
+@media (max-width:560px){.pin{width:20px;height:20px;font-size:11px}}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px 28px;margin:0;padding:0;list-style:none}
+.legend li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:15px}
+.legend .n{width:24px;height:24px;border-radius:50%;background:var(--paint);color:var(--paint-ink);font:700 13px var(--f-mono);display:grid;place-items:center;margin-top:1px}
+.legend b{font-weight:600}
+.legend span{color:var(--muted)}
+
+/* Privacy matrix */
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted);background:var(--band)}
+tbody th{font-weight:600;white-space:nowrap}
+.yes{font-weight:600}
+.no{color:var(--muted)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.dot.on{background:var(--ink)}
+.dot.off{border:1.5px solid var(--muted)}
+
+/* Instructor flow */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:4px;padding:14px;display:grid;gap:6px;align-content:start;background:var(--surface);position:relative;min-width:0}
+.step .code{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.step h4{margin:0;font-size:15.5px}
+.step p{font-size:14px;color:var(--muted)}
+.step .data{font-family:var(--f-mono);font-size:12.5px;color:var(--ink);background:var(--band);padding:6px 8px;border-radius:2px}
+.step.end{border-color:var(--ok);border-width:2px}
+
+/* AI split */
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.split > div{padding:20px;display:grid;gap:10px;align-content:start}
+.split > div:first-child{background:var(--band)}
+.split ul{margin:0;padding-left:18px;font-size:15px}
+.split li{margin:5px 0}
+
+/* Findings */
+.findings{display:grid;gap:0;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.f-row{display:grid;grid-template-columns:76px minmax(0,1fr) 128px;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.f-row:last-child{border-bottom:0}
+.f-row.head{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted);background:var(--band)}
+.f-id{font-family:var(--f-mono);font-size:13px}
+.f-txt{font-size:14.5px}
+.f-txt small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.sev{display:grid;grid-template-columns:repeat(4,1fr) 18px;gap:3px;align-items:center}
+.sev i{height:10px;background:var(--band);border:1px solid var(--line);border-radius:1px}
+.sev i.f1{background:var(--muted);border-color:var(--muted)}
+.sev i.f2{background:var(--warn);border-color:var(--warn)}
+.sev i.f3{background:var(--bad);border-color:var(--bad)}
+.sev b{font-family:var(--f-mono);font-size:12px;text-align:right;font-weight:500}
+.f-row.me{box-shadow:inset 4px 0 0 var(--me)}
+@media (max-width:560px){.f-row{grid-template-columns:62px minmax(0,1fr)}.f-row .sev{grid-column:2}.f-row.head > :last-child{display:none}}
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}
+.theme{display:grid;gap:6px;align-content:start;border-top:3px solid var(--ink);padding-top:12px}
+.theme .cnt{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.theme b{font-family:var(--f-display);font-size:21px;text-transform:uppercase;line-height:1.1}
+.theme p{font-size:14.5px;color:var(--muted)}
+
+.methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.method{border:1px solid var(--line);border-radius:4px;padding:16px;display:grid;gap:6px;align-content:start;background:var(--surface)}
+.method.me{border:2px solid var(--paint)}
+.method .what{font-family:var(--f-display);font-size:20px;font-weight:600;text-transform:uppercase;line-height:1.1}
+.method p{font-size:14px;color:var(--muted)}
+.method .ids{font-family:var(--f-mono);font-size:12px}
+
+/* Roadmap */
+.road{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.road > div{border:1px solid var(--line);border-radius:4px;padding:18px;display:grid;gap:10px;align-content:start;background:var(--surface)}
+.road h4{margin:0;font-family:var(--f-display);font-size:22px;text-transform:uppercase}
+.road ul{margin:0;padding-left:18px;font-size:15px}
+.road li{margin:5px 0}
+.road .test{border-color:var(--ink)}
+.quote-check{font-family:var(--f-mono);font-size:13.5px;background:var(--band);padding:10px 12px;border-radius:2px}
+
+/* Screens */
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}
+.screens figure{margin:0;display:grid;gap:8px;align-content:start;min-width:0}
+.screens img{border:1px solid var(--line);border-radius:3px;background:#F6F3EC;width:100%;height:auto;display:block}
+.screens figcaption{font-size:14px;color:var(--muted)}
+.screens figcaption b{font-family:var(--f-mono);font-weight:500;color:var(--ink);margin-right:6px}
+.screens .wide{grid-column:1/-1}
+.subhead{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:15px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
+
+.foot{border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:14px;display:grid;gap:6px}
+
+.hero .tagline{font-family:var(--f-display);font-weight:600;font-size:clamp(20px,2.6vw,28px);letter-spacing:.04em;text-transform:uppercase;color:var(--asphalt-ink)}
+.personas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.persona{border:1px solid var(--line);border-radius:4px;padding:18px;display:grid;gap:6px;align-content:start;min-width:0}
+.persona b{font-family:var(--f-display);font-size:30px;text-transform:uppercase;line-height:1}
+.persona i{font-style:normal;color:var(--muted);font-size:14px}
+.persona p{font-size:15px}
+.persona .serves{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.goal{border-top:3px solid var(--paint);padding-top:12px;display:grid;gap:4px;align-content:start}
+.goal b{font-size:17px;line-height:1.3}
+.goal p{font-size:14.5px;color:var(--muted)}
+table.trace td:first-child{width:36%}
+table.trace td:last-child{white-space:nowrap;font-size:13px;color:var(--muted)}
+table.trace tr.grp th{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--ink);background:transparent;border-bottom:2px solid var(--ink);padding-top:18px}
+table.trace tr.later td{color:var(--muted);font-style:italic;background:var(--band)}
+.objects{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.obj{border:1px solid var(--line);border-radius:4px;padding:14px;display:grid;gap:6px;align-content:start}
+.obj p{font-size:14.5px;color:var(--muted)}
+.obj.key{border:2px solid var(--paint)}
+.codes{font-size:13px!important;color:var(--ink)!important;line-height:1.7}
+.codes b{font-family:var(--f-mono);font-weight:500}
+.launch{margin-top:16px;border:1px dashed var(--muted);border-radius:4px;padding:14px 16px;display:grid;gap:8px}
+.launchers{display:flex;flex-wrap:wrap;gap:8px}
+.launchers span{background:var(--paint);color:var(--paint-ink);padding:4px 10px;border-radius:2px;font-size:14px}
+.launchers b{font-family:var(--f-mono);margin-right:4px}
+.launch p{font-size:14px;color:var(--muted)}
+.rules{border-top:1px solid var(--line);display:grid;gap:8px}
+.rules ul,.voice ul{margin:0;padding-left:18px;font-size:15px}
+.rules li,.voice li{margin:4px 0}
+.voice{display:grid;gap:10px;align-content:start;min-width:0}
+.voice blockquote{margin:0;font-size:16px;display:grid;grid-template-columns:44px 1fr;gap:8px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.voice blockquote .mono{font-size:12px;color:var(--muted);padding-top:3px}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:15px}
+.checks li{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:baseline}
+.chip{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:2px 0;border-radius:2px}
+.chip.ok{background:var(--ink);color:var(--bg)}
+.chip.part{border:1.5px solid var(--warn);color:var(--warn)}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--paint);outline-offset:2px}
+
+.backbar{background:var(--asphalt);border-bottom:1px solid #4A4F59}
+.backbar .wrap{padding-block:12px}
+.backbar a{color:#C9CDD4;text-decoration:none;font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:14px}
+.backbar a:hover{color:var(--paint)}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<nav class="backbar"><div class="wrap"><a href="/">← Yiyang Che Wang · Portfolio</a></div></nav>
+
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Georgia Tech · CS 6750 Human-Computer Interaction · Group project · D3 prototype, November 2026</p>
+    <h1>Question<br>Parking Lot</h1>
+    <p class="tagline">Capture now. Reflect later. Ask safely. Learn with follow-up.</p>
+    <p class="lede">Bookmark a confusing moment during the lecture. Ask about it after class, when you can say what you need.</p>
+    <div class="lane" aria-hidden="true"></div>
+    <div class="bays">
+      <div class="bay"><b>Team</b><span>4 designers</span></div>
+      <div class="bay"><b>My role</b><span>Concept, research, prototype</span></div>
+      <div class="bay"><b>Prototype</b><span>Figma, low-fidelity, desktop</span></div>
+      <div class="bay"><b>Evaluation</b><span>2 walkthroughs, 2 heuristic reviews</span></div>
+      <div class="bay"><b>Scenario</b><span>Intro to ML · Week 8 · Slide 18</span></div>
+      <div class="bay"><b>Status</b><span>Iterating toward think-aloud tests</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- Overview -->
+<section aria-labelledby="s-overview">
+  <div class="sec-head">
+    <p class="eyebrow">Overview</p>
+    <h2 id="s-overview">One question, one car</h2>
+    <p>Students save a lecture moment with one click and come back to it after class. A question they choose to share becomes a car in a parking lot sorted by topic. The instructor reviews the cars, answers, and the student decides when the question is settled.</p>
+  </div>
+  <figure class="plate" style="margin:0">
+    <div class="plate-top"><span class="fig">FIG. 01</span><h3>The after-class parking lot</h3></div>
+    <div class="plate-body" style="padding:0"><img src="question-parking-lot/lot.png" alt="Parking-lot workspace: cars parked in topic zones for Adam Optimizer, Learning Rate and Gradient Descent, with the student's own answered car outlined in yellow." style="display:block;width:100%;height:auto"></div>
+    <figcaption class="plate-note">Figma prototype, sample data. Eight submitted questions: seven seeded, one from the scenario student (outlined, Slide 18, Answered).</figcaption>
+  </figure>
+
+  <div class="contrib">
+    <div>
+      <p class="tag">What I did</p>
+      <ul>
+        <li>Came up with the Question Parking Lot concept</li>
+        <li>D1: classroom observations and student interviews</li>
+        <li>D2: ran the brainstorming and wrote the proposal</li>
+        <li>After D2: interviewed five education professors on my own</li>
+        <li>D3: designed and built the whole Figma prototype, three hubs and about 40 overlays</li>
+        <li>D3: heuristic evaluation of lecture setup, checkpoint planning, the review reminder and the bookmark drawer <span class="mine">Mine</span></li>
+      </ul>
+    </div>
+    <div>
+      <p class="tag">What the team did</p>
+      <ul>
+        <li>Further D1 observations and interviews</li>
+        <li>Affinity diagram and question journey map</li>
+        <li>Three of the four D3 inspections: two cognitive walkthroughs and the instructor-screen heuristic review</li>
+        <li>Writing the D1–D3 reports together</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Problem -->
+<section aria-labelledby="s-problem">
+  <div class="sec-head">
+    <p class="eyebrow">Problem</p>
+    <h2 id="s-problem">Why questions go unasked</h2>
+    <p>In one observed lecture, the professor asked “Any questions?” and moved to the next slide almost at once. Our research found that silence rarely meant students understood.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 02</span><h3>Three reasons students stay quiet</h3></div>
+    <div class="plate-body">
+      <div class="barriers">
+        <div class="barrier"><span class="big">It feels risky</span><p>Asking in front of others can make a student look unprepared or slow the class down.</p></div>
+        <div class="barrier"><span class="big">It isn't clear yet</span><p>Students often know they are lost before they can say where. Forming a question takes time.</p></div>
+        <div class="barrier"><span class="big">The lecture moves on</span><p>The window to ask closes quickly. Questions saved “for later” are often forgotten.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 03</span><h3>An expert lens on engagement</h3></div>
+    <div class="plate-body">
+      <div class="factors">
+        <div class="factor"><b>Competence</b><i>Do I believe I can learn this?</i><span>Help students notice a gap: material can feel familiar without being usable.</span></div>
+        <div class="factor"><b>Value</b><i>Is returning to this worth my time?</i><span>Give review a place in the course routine rather than relying on motivation.</span></div>
+        <div class="factor"><b>Belonging</b><i>Is it safe to show I don't understand?</i><span>Offer anonymity, say who can see each question, and treat confusion as useful.</span></div>
+        <div class="factor"><b>Autonomy</b><i>Do I have real choices here?</i><span>Let students pick the kind of help and decide when a question is resolved.</span></div>
+      </div>
+    </div>
+    <p class="plate-note">Framework offered by an educational psychologist among the five professors I interviewed after D2. Each factor maps to a D3 design decision.</p>
+  </div>
+</section>
+
+
+<!-- Users -->
+<section aria-labelledby="s-users">
+  <div class="sec-head">
+    <p class="eyebrow">Users and goals</p>
+    <h2 id="s-users">Who it is for</h2>
+    <p>Two student personas from our D1 research and the instructor who answers them. Each has a different reason the current “raise your hand” model fails.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 04</span><h3>Personas and core stories</h3></div>
+    <div class="plate-body">
+      <div class="personas">
+        <div class="persona"><span class="tag">Student</span><b>Maya</b><i>Delayed processor</i><p>“While listening, I want to mark an unclear slide without losing the next explanation, then return later to think and ask clearly.”</p><span class="serves">Served by one-click capture and the review window</span></div>
+        <div class="persona"><span class="tag">Student</span><b>Alex</b><i>Reluctant public speaker</i><p>“I want to ask a question without exposing myself to public judgment or having to speak in front of classmates.”</p><span class="serves">Served by private drafts and anonymous sharing</span></div>
+        <div class="persona"><span class="tag">Teaching</span><b>Instructor</b><i>Busy lecturer</i><p>“I want to understand which ideas students are revisiting or asking about, inspect their actual questions, and respond at a useful moment without a constant live dashboard.”</p><span class="serves">Served by grouped originals and planned checkpoints</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 05</span><h3>Four product goals</h3></div>
+    <div class="plate-body">
+      <div class="goals">
+        <div class="goal"><span class="tag">Attention</span><b>Keep attention on the lecture</b><p>Bookmark now, formulate later.</p></div>
+        <div class="goal"><span class="tag">Safety</span><b>Lower social and language pressure</b><p>Draft privately and choose who may see a question.</p></div>
+        <div class="goal"><span class="tag">Signal</span><b>Give instructors evidence they can act on</b><p>Keep saved moments apart from questions; AI only assists.</p></div>
+        <div class="goal"><span class="tag">Loop</span><b>Close the learning loop</b><p>A visible reply leads to a concrete next step.</p></div>
+      </div>
+    </div>
+    <p class="plate-note">From the D3 prototype specification. “More clicks” is not treated as “more learning”.</p>
+  </div>
+</section>
+
+<!-- Expert feedback -->
+<section aria-labelledby="s-expert">
+  <div class="sec-head">
+    <p class="eyebrow">Expert input</p>
+    <h2 id="s-expert">What the professors said, and what I built</h2>
+    <p>After D2 I interviewed five education professors about how students handle confusion. The most detailed reply came from an educational psychologist. I traced every recommendation to a screen before building the prototype.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 06</span><h3>Feedback traced to design</h3></div>
+    <div class="plate-body scroll" style="padding:0">
+      <table class="trace" style="min-width:720px">
+        <thead><tr><th scope="col">What I heard</th><th scope="col">What I built</th><th scope="col">Where</th></tr></thead>
+        <tbody>
+          <tr class="grp"><th colspan="3" scope="colgroup">Four engagement factors</th></tr>
+          <tr><td><b>Competence.</b> Students may sense confusion without knowing where it is</td><td>Help-type prompts: another explanation, applying the idea, verify, not sure. An explain-or-apply check after the reply.</td><td class="mono">S6 · S10</td></tr>
+          <tr><td><b>Value.</b> Revisiting needs a reason worth the effort</td><td>A review moment built into class; replies linked to the original slide; concrete study actions.</td><td class="mono">S4 · S9 · S10</td></tr>
+          <tr><td><b>Belonging.</b> Asking can feel socially and intellectually risky</td><td>Anonymous sharing, labeled example questions, wording that treats confusion as normal.</td><td class="mono">S7 · T0</td></tr>
+          <tr><td><b>Autonomy.</b> Learners want different kinds of help</td><td>Private, anonymous or named; several next-step options; the student decides when it's resolved.</td><td class="mono">S7 · S10</td></tr>
+          <tr class="grp"><th colspan="3" scope="colgroup">Specific recommendations</th></tr>
+          <tr><td>Students often can't form a question during the lecture</td><td>One click saves the slide and time. No typing or category during class.</td><td class="mono">S2 · S3</td></tr>
+          <tr><td>Questions saved “for later” get forgotten</td><td>Build review into the class routine: the last two minutes, with the option to defer.</td><td class="mono">S4 · T0</td></tr>
+          <tr><td>“Any questions?” rarely works</td><td>Planned checkpoints with a short task instead of a vague invitation.</td><td class="mono">T0 · T5</td></tr>
+          <tr><td>Brief checks of understanding should be planned in; that interruption helps</td><td>The instructor schedules a poll, practice problem or peer discussion at a slide boundary.</td><td class="mono">T5</td></tr>
+          <tr><td>Offer anonymity and explain what instructors can see</td><td>A visibility preview for every option; names hidden from the instructor for anonymous questions.</td><td class="mono">S7 · T3</td></tr>
+          <tr><td>Seed the lot so nobody has to post first</td><td>One or two instructor examples, labeled and left out of the counts.</td><td class="mono">T0 · S8</td></tr>
+          <tr><td>Sorting questions is not the same as resolving them</td><td>Each reply leads to a strategy: another example, practice, a peer, office hours.</td><td class="mono">S6 · S10</td></tr>
+          <tr><td>Normalize confusion as information, not deficiency</td><td>“Confusion is a useful starting point for learning.” “Knowing what to work on next is progress.”</td><td class="mono">S4 · S10</td></tr>
+          <tr><td>Students stop using a tool if nothing visibly happens</td><td>Car status changes, a published reply, and an “Address next class” option for the instructor.</td><td class="mono">S8 · T4 · S9</td></tr>
+          <tr><td>Recall and application show more than familiarity</td><td>An optional retrieval or application prompt; reading a reply isn't treated as mastery.</td><td class="mono">S10</td></tr>
+          <tr class="later"><td>More guidance on why a student is confused; more actionable instructor summaries; tracking unresolved questions</td><td>Not added yet. More options could make class interactions busier, so we want usability results first.</td><td class="mono">Deferred</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="plate-note">The expert input was written feedback, not a usability result. Each feature is my interpretation and still has to be tested.</p>
+  </div>
+</section>
+
+<!-- Evolution -->
+<section aria-labelledby="s-evo">
+  <div class="sec-head">
+    <p class="eyebrow">Iteration</p>
+    <h2 id="s-evo">From a live alert to a saved moment</h2>
+    <p>D2 asked students to write questions during class and warned the instructor in real time. Expert interviews pushed us to separate capture from asking.</p>
+  </div>
+  <div class="timeline">
+    <div class="tl"><span class="when">Sep 2026 · D1</span><b>Research</b><p>Observations, interviews, affinity diagram, journey map</p></div>
+    <div class="tl"><span class="when">D2</span><b>Concepts</b><p>Three alternatives; combined parking lot with red/green feedback</p></div>
+    <div class="tl"><span class="when">After D2</span><b>Experts</b><p>I interviewed five education professors about the direction</p></div>
+    <div class="tl now"><span class="when">Nov 2026 · D3</span><b>Prototype</b><p>Bookmark-then-ask flow in Figma, then four inspections</p></div>
+    <div class="tl"><span class="when">Next</span><b>Test</b><p>Think-aloud with students, walkthrough with an instructor</p></div>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 07</span><h3>What changed between D2 and D3</h3></div>
+    <div class="plate-body">
+      <div class="evo" role="table" aria-label="D2 versus D3">
+        <div class="h" role="columnheader">Decision</div><div class="h" role="columnheader">D2 concept</div><div class="h arr" aria-hidden="true"></div><div class="h" role="columnheader">D3 prototype</div>
+        <div class="k">During class</div><div class="old">Tap “I understand” or “I have a question” and type it</div><div class="arr" aria-hidden="true">→</div><div class="new">One click saves the slide and time. No typing.</div>
+        <div class="k">Writing the question</div><div class="old">In the moment, under time pressure</div><div class="arr" aria-hidden="true">→</div><div class="new">After class, with the slide excerpt in view</div>
+        <div class="k">Signal to instructor</div><div class="old"><s>Traffic light turns red when confusion passes a threshold</s></div><div class="arr" aria-hidden="true">→</div><div class="new">Removed. The instructor plans checkpoints and decides when to pause.</div>
+        <div class="k">Sharing</div><div class="old">Anonymous or named</div><div class="arr" aria-hidden="true">→</div><div class="new">Private draft, anonymous, or named to the instructor only</div>
+        <div class="k">After an answer</div><div class="old">Not designed</div><div class="arr" aria-hidden="true">→</div><div class="new">Learning check. Answered is not the same as resolved.</div>
+        <div class="k">Kept</div><div class="old">Parking-lot metaphor, topic grouping</div><div class="arr" aria-hidden="true">→</div><div class="new">Same metaphor; AI grouping is a suggestion the instructor edits</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- System -->
+<section aria-labelledby="s-system">
+  <div class="sec-head">
+    <p class="eyebrow">System</p>
+    <h2 id="s-system">How one lecture flows</h2>
+    <p>The prototype has three hubs: a slide viewer during class, the parking lot after class, and an instructor parking lot. Everything else opens as an overlay so people keep their place.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 08</span><h3>Service blueprint</h3></div>
+    <div class="plate-body scroll">
+      <svg viewBox="0 0 1100 400" role="img" aria-labelledby="bp-t">
+        <title id="bp-t">Service blueprint across five phases of a lecture for the student, the system and the instructor.</title>
+        <defs><marker id="a-bp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="d-band" x="0" y="48" width="1100" height="104"/>
+        <rect class="d-band" x="0" y="272" width="1100" height="104"/>
+        <g text-anchor="middle">
+          <text class="d-lbl" x="221" y="28">BEFORE CLASS</text>
+          <text class="d-lbl" x="415" y="28">DURING CLASS</text>
+          <text class="d-lbl" x="609" y="28">END OF CLASS</text>
+          <text class="d-lbl" x="803" y="28">AFTER CLASS</text>
+          <text class="d-lbl" x="997" y="28">AFTER THE REPLY</text>
+        </g>
+        <text class="d-lbl" x="14" y="105">STUDENT</text>
+        <text class="d-lbl" x="14" y="217">SYSTEM</text>
+        <text class="d-lbl" x="14" y="329">INSTRUCTOR</text>
+        <line class="d-sep d-dash" x1="0" y1="160" x2="1100" y2="160"/>
+        <line class="d-sep d-dash" x1="0" y1="264" x2="1100" y2="264"/>
+        <!-- student -->
+        <g>
+          <rect class="d-box" x="134" y="62" width="174" height="76" rx="4"/><text class="d-t" x="146" y="90">Opens today's lecture</text><text class="d-s" x="146" y="112">Sees the privacy notice</text>
+          <rect class="d-key" x="328" y="62" width="174" height="76" rx="4"/><text class="d-tk" x="340" y="90">Bookmarks a moment</text><text class="d-sk" x="340" y="112">One click, keeps listening</text>
+          <rect class="d-box" x="522" y="62" width="174" height="76" rx="4"/><text class="d-t" x="534" y="90">Gets a review reminder</text><text class="d-s" x="534" y="112">Reviews now or later</text>
+          <rect class="d-box" x="716" y="62" width="174" height="76" rx="4"/><text class="d-t" x="728" y="90">Writes and shares</text><text class="d-s" x="728" y="112">Picks who can see it</text>
+          <rect class="d-box" x="910" y="62" width="174" height="76" rx="4"/><text class="d-t" x="922" y="90">Reads the reply</text><text class="d-s" x="922" y="112">Chooses a next step</text>
+          <path class="d-line" d="M308,100 H326" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M502,100 H520" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M696,100 H714" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M890,100 H908" marker-end="url(#a-bp)"/>
+        </g>
+        <!-- system -->
+        <g>
+          <rect class="d-box" x="134" y="174" width="174" height="76" rx="4"/><text class="d-t" x="146" y="202">Loads the slide deck</text><text class="d-s" x="146" y="224">Example questions marked</text>
+          <rect class="d-box" x="328" y="174" width="174" height="76" rx="4"/><text class="d-t" x="340" y="202">Saves slide and time</text><text class="d-s" x="340" y="224">Confirms in place, Undo</text>
+          <rect class="d-box" x="522" y="174" width="174" height="76" rx="4"/><text class="d-t" x="534" y="202">Counts bookmarks</text><text class="d-s" x="534" y="224">“About 2 minutes”</text>
+          <rect class="d-box" x="716" y="174" width="174" height="76" rx="4"/><text class="d-t" x="728" y="202">Parks one car each</text><text class="d-s" x="728" y="224">Suggests topic groups (AI)</text>
+          <rect class="d-box" x="910" y="174" width="174" height="76" rx="4"/><text class="d-t" x="922" y="202">Updates the status</text><text class="d-s" x="922" y="224">Under review → Answered</text>
+        </g>
+        <!-- instructor -->
+        <g>
+          <rect class="d-box" x="134" y="286" width="174" height="76" rx="4"/><text class="d-t" x="146" y="314">Prepares the lecture</text><text class="d-s" x="146" y="336">Plans a checkpoint</text>
+          <rect class="d-box" x="328" y="286" width="174" height="76" rx="4"/><text class="d-t" x="340" y="314">Teaches</text><text class="d-s" x="340" y="336">Runs the planned pause</text>
+          <rect class="d-box" x="522" y="286" width="174" height="76" rx="4"/><text class="d-t" x="534" y="314">Gives time to review</text><text class="d-s" x="534" y="336">Final 2 minutes of class</text>
+          <rect class="d-box" x="716" y="286" width="174" height="76" rx="4"/><text class="d-t" x="728" y="314">Reviews originals</text><text class="d-s" x="728" y="336">Edits the AI groups</text>
+          <rect class="d-box" x="910" y="286" width="174" height="76" rx="4"/><text class="d-t" x="922" y="314">Previews, publishes</text><text class="d-s" x="922" y="336">One reply per topic group</text>
+          <path class="d-line" d="M308,324 H326" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M502,324 H520" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M696,324 H714" marker-end="url(#a-bp)"/>
+          <path class="d-line" d="M890,324 H908" marker-end="url(#a-bp)"/>
+        </g>
+        <!-- cross-lane -->
+        <path class="d-line d-dash" d="M415,138 V172" marker-end="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M609,138 V172" marker-start="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M803,138 V172" marker-end="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M803,250 V284" marker-end="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M997,284 V252" marker-end="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M997,174 V140" marker-end="url(#a-bp)"/>
+        <path class="d-line d-dash" d="M221,250 V284" marker-start="url(#a-bp)"/>
+        <text class="d-edge" x="14" y="392">Solid arrows: one person's sequence. Dashed arrows: hand-offs between the student, the system and the instructor.</text>
+      </svg>
+    </div>
+  </div>
+
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 09</span><h3>Six things the system keeps</h3></div>
+    <div class="plate-body">
+      <div class="objects">
+        <div class="obj"><span class="tag">Bookmark</span><p>A student's marker on a lecture, slide and time. Not automatically a question, and not proof of confusion.</p></div>
+        <div class="obj"><span class="tag">Question</span><p>Text the student writes from a bookmark. Kept private, or shared anonymously or by name.</p></div>
+        <div class="obj"><span class="tag">AI topic</span><p>A suggested grouping of shared questions. The instructor can revise it; originals are kept.</p></div>
+        <div class="obj key"><span class="tag">Car</span><p>One shared question, never one bookmark. Instructor examples carry a separate “Example” marker.</p></div>
+        <div class="obj"><span class="tag">Response</span><p>A human-approved answer, example, resource, or plan to revisit next class.</p></div>
+        <div class="obj"><span class="tag">Learning action</span><p>The student's next step after a reply. Not an automated learning score.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 10</span><h3>Prototype map</h3></div>
+    <div class="plate-body">
+      <div class="grid g3">
+        <div class="card"><span class="tag">Hub 1 · During class</span><h4>Slide viewer</h4><p>Scrolling slides 16–20 with “Bookmark this moment” on each.</p><p class="codes"><b>S1</b> course home · <b>S2</b> live bookmark · <b>S3</b> saved toast, Undo</p></div>
+        <div class="card"><span class="tag">Hub 2 · After class</span><h4>Student parking lot</h4><p>Cars by topic zone. Review, drafting and replies open as overlays.</p><p class="codes"><b>S4</b> review prompt · <b>S5</b> My Bookmarks · <b>S6</b> reflect · <b>S7</b> who can see · <b>S8</b> lot · <b>S9</b> reply · <b>S10</b> next step</p></div>
+        <div class="card"><span class="tag">Hub 3 · Instructor</span><h4>Instructor parking lot</h4><p>Lecture setup, insights and responses, all as overlays.</p><p class="codes"><b>T0</b> prepare · <b>T1</b> insights · <b>T2</b> slide analytics · <b>T3</b> AI topic review · <b>T4</b> respond · <b>T5</b> checkpoint</p></div>
+      </div>
+      <div class="launch">
+        <span class="tag">Evaluation reference frame</span>
+        <div class="launchers"><span><b>1–2</b> Student capture &amp; share</span><span><b>3</b> Instructor review</span><span><b>4</b> Student follow-up</span></div>
+        <p>Each launcher resets the prototype state, so every evaluator starts the same task from the same point.</p>
+      </div>
+    </div>
+    <p class="plate-note">All 16 screens in the specification exist as a hub state or an overlay: three 1440 × 900 hubs instead of 16 separate pages, so no flow leaves its workspace.</p>
+  </div>
+</section>
+
+<!-- Student flow -->
+<section aria-labelledby="s-student">
+  <div class="sec-head">
+    <p class="eyebrow">Student experience</p>
+    <h2 id="s-student">Save now, ask later</h2>
+    <p>The only thing asked of a student during class is one click. Everything that takes thought happens after class, in an order that keeps sharing as the last and most deliberate step.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 11</span><h3>Student flow</h3></div>
+    <div class="plate-body scroll">
+      <svg viewBox="0 0 900 1130" role="img" aria-labelledby="sf-t" style="min-width:680px">
+        <title id="sf-t">Student flow from bookmarking during class to choosing a next step after an instructor reply.</title>
+        <defs><marker id="a-sf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="d-band" x="0" y="0" width="900" height="120"/>
+        <rect class="d-band" x="0" y="310" width="900" height="200"/>
+        <rect class="d-band" x="0" y="820" width="900" height="310"/>
+        <text class="d-lbl" x="16" y="28">DURING CLASS</text>
+        <text class="d-lbl" x="16" y="148">END OF CLASS</text>
+        <text class="d-lbl" x="16" y="338">AFTER CLASS · REFLECT</text>
+        <text class="d-lbl" x="16" y="538">AFTER CLASS · SHARE</text>
+        <text class="d-lbl" x="16" y="848">AFTER THE REPLY</text>
+
+        <!-- N1 -->
+        <rect class="d-key" x="320" y="40" width="260" height="56" rx="4"/>
+        <text class="d-tk" x="334" y="63">Bookmark this moment</text><text class="d-sk" x="334" y="83">One click on the current slide</text>
+        <rect class="d-ghost" x="640" y="40" width="240" height="56" rx="4"/>
+        <text class="d-t" x="654" y="63">✓ Moment saved · Undo</text><text class="d-s" x="654" y="83">Slide 18 · 2:14 PM · count +1</text>
+        <path class="d-line d-dash" d="M580,68 H638" marker-end="url(#a-sf)"/>
+        <path class="d-line" d="M450,96 V148" marker-end="url(#a-sf)"/>
+
+        <!-- N2 -->
+        <rect class="d-box" x="320" y="150" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="173">Class review reminder</text><text class="d-s" x="334" y="193">3 saved · about 2 minutes</text>
+        <rect class="d-ghost" x="640" y="150" width="240" height="56" rx="4"/>
+        <text class="d-t" x="654" y="173">Remind me later</text><text class="d-s" x="654" y="193">Review stays pending</text>
+        <path class="d-line" d="M580,178 H638" marker-end="url(#a-sf)"/>
+        <text class="d-edge" x="592" y="170">later</text>
+        <path class="d-line d-dash" d="M760,206 V268 H582" marker-end="url(#a-sf)"/>
+        <text class="d-edge" x="600" y="260">resume any time</text>
+        <path class="d-line" d="M450,206 V238" marker-end="url(#a-sf)"/>
+        <text class="d-edge" x="460" y="226">review now</text>
+
+        <!-- N3 -->
+        <rect class="d-box" x="320" y="240" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="263">My Bookmarks</text><text class="d-s" x="334" y="283">Slide title, time and status</text>
+        <path class="d-line" d="M450,296 V352" marker-end="url(#a-sf)"/>
+
+        <!-- N4 -->
+        <rect class="d-box" x="320" y="354" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="377">Review a saved moment</text><text class="d-s" x="334" y="397">Slide excerpt and timestamp</text>
+        <path class="d-line" d="M450,410 V434" marker-end="url(#a-sf)"/>
+
+        <!-- N5 -->
+        <rect class="d-box" x="320" y="436" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="459">Pick help type, draft question</text><text class="d-s" x="334" y="479">Explain · Apply · Verify · Not sure</text>
+        <rect class="d-ghost" x="30" y="436" width="240" height="56" rx="4"/>
+        <text class="d-t" x="44" y="459">Help me clarify (AI)</text><text class="d-s" x="44" y="479">Optional · never replaces wording</text>
+        <path class="d-line d-dash" d="M318,464 H272" marker-end="url(#a-sf)" marker-start="url(#a-sf)"/>
+        <path class="d-line" d="M450,492 V552" marker-end="url(#a-sf)"/>
+        <text class="d-edge" x="460" y="530">Continue</text>
+
+        <!-- N6 -->
+        <rect class="d-ring" x="320" y="554" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="577">Who can see this question?</text><text class="d-s" x="334" y="597">Chosen before anything is shared</text>
+        <path class="d-line" d="M450,610 V630 M160,630 H740"/>
+        <path class="d-line" d="M160,630 V652" marker-end="url(#a-sf)"/>
+        <path class="d-line" d="M450,630 V652" marker-end="url(#a-sf)"/>
+        <path class="d-line" d="M740,630 V652" marker-end="url(#a-sf)"/>
+        <rect class="d-box" x="40" y="654" width="240" height="56" rx="4"/>
+        <text class="d-t" x="54" y="677">Keep private</text><text class="d-s" x="54" y="697">Only you · no car is created</text>
+        <rect class="d-box" x="330" y="654" width="240" height="56" rx="4"/>
+        <text class="d-t" x="344" y="677">Submit anonymously</text><text class="d-s" x="344" y="697">Instructor sees question, no name</text>
+        <rect class="d-box" x="620" y="654" width="240" height="56" rx="4"/>
+        <text class="d-t" x="634" y="677">Show my name</text><text class="d-s" x="634" y="697">Name visible to instructor only</text>
+        <path class="d-line" d="M160,710 V738" marker-end="url(#a-sf)"/>
+        <rect class="d-ghost" x="40" y="740" width="240" height="56" rx="4"/>
+        <text class="d-t" x="54" y="763">Private draft</text><text class="d-s" x="54" y="783">Stays in My Bookmarks</text>
+        <path class="d-line" d="M740,710 V726 H452"/>
+        <path class="d-line" d="M450,710 V738" marker-end="url(#a-sf)"/>
+        <rect class="d-key" x="320" y="740" width="260" height="56" rx="4"/>
+        <text class="d-tk" x="334" y="763">One question = one car</text><text class="d-sk" x="334" y="783">Parked in its topic zone</text>
+        <path class="d-line" d="M450,796 V858" marker-end="url(#a-sf)"/>
+
+        <!-- N8 -->
+        <rect class="d-okbox" x="320" y="860" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="883">Under review → Answered</text><text class="d-s" x="334" y="903">Instructor publishes a reply</text>
+        <path class="d-line" d="M450,916 V938" marker-end="url(#a-sf)"/>
+
+        <!-- N9 -->
+        <rect class="d-box" x="320" y="940" width="260" height="56" rx="4"/>
+        <text class="d-t" x="334" y="963">What would you like to do next?</text><text class="d-s" x="334" y="983">Learning check · not graded</text>
+        <path class="d-line" d="M450,996 V1012 M160,1012 H740"/>
+        <path class="d-line" d="M160,1012 V1034" marker-end="url(#a-sf)"/>
+        <path class="d-line" d="M450,1012 V1034" marker-end="url(#a-sf)"/>
+        <path class="d-line" d="M740,1012 V1034" marker-end="url(#a-sf)"/>
+        <rect class="d-inkbox" x="40" y="1036" width="240" height="56" rx="4"/>
+        <text class="d-tinv" x="54" y="1059">I can explain it</text><text class="d-tinv" x="54" y="1079" style="font-weight:400;font-size:12px;opacity:.8">Mark resolved · can reopen</text>
+        <rect class="d-box" x="330" y="1036" width="240" height="56" rx="4"/>
+        <text class="d-t" x="344" y="1059">I need practice</text><text class="d-s" x="344" y="1079">Unscored problem, worked steps</text>
+        <rect class="d-box" x="620" y="1036" width="240" height="56" rx="4"/>
+        <text class="d-t" x="634" y="1059">I'm still confused</text><text class="d-s" x="634" y="1079">Follow-up · example · office hours</text>
+        <path class="d-line d-dash" d="M860,1064 H884 V968 H582" marker-end="url(#a-sf)"/>
+        <text class="d-edge" x="740" y="960">back to next steps</text>
+        <path class="d-line d-dash" d="M450,1092 V1112 H884 V1064"/>
+      </svg>
+    </div>
+    <p class="plate-note">Yellow marks the two moments the parking lot is built around: the one-click bookmark and the car. The privacy choice, outlined in yellow, comes after the question is written.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 12</span><h3>The life of a question</h3></div>
+    <div class="plate-body scroll">
+      <svg viewBox="0 0 1100 250" role="img" aria-labelledby="st-t">
+        <title id="st-t">Question states: Not reviewed, Draft question, Parked, Under review, Answered, Resolved.</title>
+        <defs><marker id="a-st" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <g text-anchor="middle">
+          <rect class="d-ghost" x="20" y="100" width="160" height="50" rx="25"/><text class="d-t" x="100" y="130">Not reviewed</text>
+          <rect class="d-ghost" x="200" y="100" width="160" height="50" rx="25"/><text class="d-t" x="280" y="130">Draft question</text>
+          <rect class="d-key" x="380" y="100" width="160" height="50" rx="25"/><text class="d-tk" x="460" y="130">Parked</text>
+          <rect class="d-box" x="560" y="100" width="160" height="50" rx="25"/><text class="d-t" x="640" y="130">Under review</text>
+          <rect class="d-okbox" x="740" y="100" width="160" height="50" rx="25"/><text class="d-t" x="820" y="130">Answered</text>
+          <rect class="d-inkbox" x="920" y="100" width="160" height="50" rx="25"/><text class="d-tinv" x="1000" y="130">Resolved</text>
+          <text class="d-edge" x="190" y="92">write</text>
+          <text class="d-edge" x="370" y="92">share</text>
+          <text class="d-edge" x="550" y="92">opened</text>
+          <text class="d-edge" x="730" y="92">published</text>
+          <text class="d-edge" x="910" y="92">student</text>
+        </g>
+        <path class="d-line" d="M180,125 H198" marker-end="url(#a-st)"/>
+        <path class="d-line" d="M360,125 H378" marker-end="url(#a-st)"/>
+        <path class="d-line" d="M540,125 H558" marker-end="url(#a-st)"/>
+        <path class="d-line" d="M720,125 H738" marker-end="url(#a-st)"/>
+        <path class="d-line" d="M900,125 H918" marker-end="url(#a-st)"/>
+        <path class="d-line d-dash" d="M100,100 C100,40 460,40 460,98" marker-end="url(#a-st)"/>
+        <text class="d-edge" x="280" y="48" text-anchor="middle">share directly from review</text>
+        <path class="d-line d-dash" d="M1000,100 C1000,46 820,46 820,98" marker-end="url(#a-st)"/>
+        <text class="d-edge" x="910" y="52" text-anchor="middle">reopen</text>
+        <path class="d-sep" d="M20,178 V188 H360 V178"/>
+        <path class="d-sep" d="M380,178 V188 H1080 V178"/>
+        <g text-anchor="middle">
+          <text class="d-lbl" x="190" y="212">PERSONAL · ONLY THE STUDENT</text>
+          <text class="d-s" x="190" y="232">No car, not in instructor counts</text>
+          <text class="d-lbl" x="730" y="212">SHARED · ONE CAR IN THE LOT</text>
+          <text class="d-s" x="730" y="232">Classmates see topic totals and status, never the text</text>
+        </g>
+      </svg>
+    </div>
+    <p class="plate-note">Answered means a reply exists. Only the student can move a question to Resolved, and reading the reply does not do it for them.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 13</span><h3>Who sees what</h3></div>
+    <div class="plate-body scroll" style="padding:0">
+      <table style="min-width:640px">
+        <thead><tr><th scope="col">Choice</th><th scope="col">Student</th><th scope="col">Instructor</th><th scope="col">Classmates</th><th scope="col">Creates a car</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Keep private</th><td class="yes"><span class="dot on"></span>Question, slide, time</td><td class="no"><span class="dot off"></span>Nothing</td><td class="no"><span class="dot off"></span>Nothing</td><td class="no">No</td></tr>
+          <tr><th scope="row">Submit anonymously</th><td class="yes"><span class="dot on"></span>Everything</td><td class="yes"><span class="dot on"></span>Question and slide, no name</td><td class="no"><span class="dot off"></span>Topic totals and status</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">Show my name</th><td class="yes"><span class="dot on"></span>Everything</td><td class="yes"><span class="dot on"></span>Question, slide and name</td><td class="no"><span class="dot off"></span>Topic totals and status</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">Bookmark only</th><td class="yes"><span class="dot on"></span>Slide and time</td><td class="no"><span class="dot off"></span>Opt-in counts in a time window</td><td class="no"><span class="dot off"></span>Nothing</td><td class="no">No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="plate-body rules">
+      <span class="tag">Rules from the specification</span>
+      <ul>
+        <li>Private by default. Notes and unsent drafts are visible only to the student.</li>
+        <li>Anonymous is the suggested default when sharing, but it is still an explicit choice.</li>
+        <li>Instructors see aggregate slide and time windows, never one student's timestamps.</li>
+        <li>Students can opt out of aggregate bookmark counts.</li>
+        <li>A paper fallback: write down the slide and time and add it later.</li>
+        <li>The prototype never claims “untraceable” anonymity; a reply still has to reach the asker.</li>
+      </ul>
+    </div>
+    <p class="plate-note">The commit button changes with the choice: “Park My Question” or “Save Privately”. These are proposed controls; production privacy protections are not built.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 14</span><h3>Reading the lot</h3></div>
+    <div class="plate-body" style="display:grid;gap:20px">
+      <div class="anno">
+        <img src="question-parking-lot/lot.png" alt="Parking-lot screen with numbered callouts.">
+        <span class="pin" style="left:5.7%;top:44%">1</span>
+        <span class="pin" style="left:20.7%;top:24%">2</span>
+        <span class="pin" style="left:43.1%;top:31%">3</span>
+        <span class="pin" style="left:32.8%;top:47%">4</span>
+        <span class="pin" style="left:68.4%;top:16.2%">5</span>
+        <span class="pin" style="left:76.4%;top:71%">6</span>
+        <span class="pin" style="left:55%;top:83%">7</span>
+        <span class="pin" style="left:46%;top:97%">8</span>
+      </div>
+      <ol class="legend">
+        <li><span class="n">1</span><div><b>Entrance.</b> <span>Every shared question arrives here and parks in a zone.</span></div></li>
+        <li><span class="n">2</span><div><b>Topic zone.</b> <span>Suggested by AI, renamed or regrouped by the instructor.</span></div></li>
+        <li><span class="n">3</span><div><b>Your car.</b> <span>Dashed outline, slide tag and status. Click it to see your question.</span></div></li>
+        <li><span class="n">4</span><div><b>Answered cars.</b> <span>Blue with a check mark. Color is never the only signal.</span></div></li>
+        <li><span class="n">5</span><div><b>Submitted count.</b> <span>Only shared student questions. Private drafts are never counted.</span></div></li>
+        <li><span class="n">6</span><div><b>Instructor examples.</b> <span>Dashed and labeled “not counted”, so nobody is the first to ask.</span></div></li>
+        <li><span class="n">7</span><div><b>Overflow zone.</b> <span>“Continued” bays extend a topic. Evaluation flagged this as confusing (CW-7).</span></div></li>
+        <li><span class="n">8</span><div><b>Status line and legend.</b> <span>Below the fold on a laptop screen, the most severe finding (CW-1).</span></div></li>
+      </ol>
+    </div>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 15</span><h3>Voice and metaphor rules</h3></div>
+    <div class="plate-body">
+      <div class="grid g2">
+        <div class="voice">
+          <span class="tag">Supportive microcopy</span>
+          <blockquote><span class="mono">S2</span>Save it now. Think about it later.</blockquote>
+          <blockquote><span class="mono">S6</span>Rough drafts are welcome. What part would you like help with?</blockquote>
+          <blockquote><span class="mono">S7</span>Your question, your choice. You can ask without showing your name.</blockquote>
+          <blockquote><span class="mono">S10</span>Knowing what to work on next is progress.</blockquote>
+          <blockquote><span class="mono">T0</span>Help students see what a useful question can look like.</blockquote>
+        </div>
+        <div class="voice">
+          <span class="tag">Parking-lot rules</span>
+          <ul>
+            <li>One shared question is one car. A private draft or a bookmark never makes a car.</li>
+            <li>Zones are content topics, never a ranking of students or question quality.</li>
+            <li>Status uses text, icon and shape, not color alone. No red/green traffic lights.</li>
+            <li>Instructor examples look different, say “Example”, and stay out of analytics.</li>
+            <li>No leaderboards that equate asking more with doing worse.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- Instructor -->
+<section aria-labelledby="s-instr">
+  <div class="sec-head">
+    <p class="eyebrow">Instructor experience</p>
+    <h2 id="s-instr">The instructor decides</h2>
+    <p>D2 told the instructor when to stop. D3 gives them evidence and leaves the timing to them, before, during and after class.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 16</span><h3>Instructor flow with sample data</h3></div>
+    <div class="plate-body">
+      <div class="steps">
+        <div class="step"><span class="code">T0 · Before class</span><h4>Prepare the lecture</h4><p>Connect slides, add example questions, schedule the end-of-class review.</p><span class="data">32 slides · 2 examples</span></div>
+        <div class="step"><span class="code">T5 · Before class</span><h4>Plan a checkpoint</h4><p>Practice, peer discussion, a quick poll or a worked example at a slide boundary.</p><span class="data">after Slide 18 · 2 min</span></div>
+        <div class="step"><span class="code">T1 · After class</span><h4>Class insights</h4><p>Bookmarks, questions and topics kept as separate counts, never a score.</p><span class="data">22 · 7 · 3</span></div>
+        <div class="step"><span class="code">T2 · After class</span><h4>Inspect a slide</h4><p>Opt-in bookmarks and linked questions in an aggregate time window.</p><span class="data">Slide 18 · 12 · 4 · 2:12–2:16</span></div>
+        <div class="step"><span class="code">T3 · After class</span><h4>Review originals</h4><p>AI summary beside students' own wording. Edit, split or merge groups.</p><span class="data">“Originals unchanged”</span></div>
+        <div class="step end"><span class="code">T4 · After class</span><h4>Write, preview, publish</h4><p>Attach a slide or worked example. A draft never notifies students.</p><span class="data">→ status: Answered</span></div>
+      </div>
+    </div>
+    <p class="plate-note">All counts are fictional prototype data: 22 opted-in bookmarks, 7 submitted questions, 3 suggested topics.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 17</span><h3>Where AI sits</h3></div>
+    <div class="plate-body">
+      <div class="split">
+        <div>
+          <p class="tag">AI suggests</p>
+          <ul>
+            <li>Groups related questions into topic zones</li>
+            <li>Writes a short summary of each group</li>
+            <li>Offers wording to help a student clarify, only when asked</li>
+          </ul>
+        </div>
+        <div>
+          <p class="tag">People decide</p>
+          <ul>
+            <li>Students keep or discard any suggested wording</li>
+            <li>Instructors rename, split and merge groups; originals stay visible</li>
+            <li>Instructors write, preview and publish every reply</li>
+            <li>Students decide when a question is resolved</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="plate-note">The prototype shows scripted AI states so the choices can be inspected. It does not run a model.</p>
+  </div>
+</section>
+
+
+<!-- Process -->
+<section aria-labelledby="s-process">
+  <div class="sec-head">
+    <p class="eyebrow">Process</p>
+    <h2 id="s-process">From specification to clickable prototype</h2>
+    <p>The specification came first. I then built it in Figma, checked the build against the spec, and fixed what broke before the team evaluated it.</p>
+  </div>
+  <div class="timeline">
+    <div class="tl"><span class="when">Nov 11</span><b>Specify</b><p>16 screens, privacy rules, data objects, five test tasks</p></div>
+    <div class="tl"><span class="when">Nov 12</span><b>Build</b><p>Three hubs and about 40 overlays in Figma</p></div>
+    <div class="tl"><span class="when">Nov 12</span><b>Review &amp; fix</b><p>Checked against the spec; six issues fixed</p></div>
+    <div class="tl"><span class="when">Nov 12–13</span><b>Inspect</b><p>Two walkthroughs, two heuristic evaluations</p></div>
+    <div class="tl now"><span class="when">Nov 15</span><b>Report</b><p>D3 prototype and early evaluation report</p></div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 18</span><h3>Five test tasks</h3></div>
+    <div class="plate-body scroll" style="padding:0">
+      <table style="min-width:680px">
+        <thead><tr><th scope="col">Task</th><th scope="col">What the participant is asked</th><th scope="col">What we look for</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1 · Capture</th><td>You notice a confusing step on Slide 18. Save it without missing the next explanation.</td><td>Findability, speed, attention cost, confirmation and Undo</td></tr>
+          <tr><th scope="row">2 · Reflect &amp; share</th><td>After class, turn the saved moment into a question and submit it without showing your name.</td><td>Context recovery, skipping AI, understanding privacy, submission</td></tr>
+          <tr><th scope="row">3 · Instructor review</th><td>Find the most-bookmarked slides, tell bookmarks from questions, and answer one.</td><td>Reading the data, seeing originals, trust in AI grouping, publishing</td></tr>
+          <tr><th scope="row">4 · Follow up</th><td>You got an explanation but still need practice. Choose what to do next.</td><td>Seeing the reply, a meaningful next step, avoiding a false “resolved”</td></tr>
+          <tr><th scope="row">5 · Privacy branch</th><td>Keep an unfinished question private instead of parking it.</td><td>Whether people see that no car and no instructor-visible text is created</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 19</span><h3>Fixed before evaluation</h3></div>
+    <div class="plate-body scroll" style="padding:0">
+      <table style="min-width:640px">
+        <thead><tr><th scope="col">Problem found in review</th><th scope="col">Fix</th></tr></thead>
+        <tbody>
+          <tr><td>The end-of-class review prompt never appeared</td><td>Trigger delay cut from 100 s to 0.8 s</td></tr>
+          <tr><td>Example questions duplicated real student questions</td><td>New examples about β₂ and β₁ that no student had asked</td></tr>
+          <tr><td>Topic review said “3 related questions” above four</td><td>Label changed to “original student wording below”</td></tr>
+          <tr><td>The lot still said “parked” after an answer</td><td>Publishing now sets “Your instructor responded…”</td></tr>
+          <tr><td>“Edit my question” still showed after an answer</td><td>Editing is turned off once a question is answered</td></tr>
+          <tr><td>Privacy options were hard to read</td><td>Standard radio buttons tied to the sharing choice</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 20</span><h3>Readiness check against the spec</h3></div>
+    <div class="plate-body">
+      <ul class="checks">
+        <li><span class="chip ok">Met</span>All 16 specified screens exist as a hub state or overlay</li>
+        <li><span class="chip ok">Met</span>Capture → review → privacy → park is clickable</li>
+        <li><span class="chip ok">Met</span>Analytics → original question → publish is clickable</li>
+        <li><span class="chip ok">Met</span>Reply → learning follow-up, with resolved, practice and still-confused paths</li>
+        <li><span class="chip ok">Met</span>Private, anonymous and named paths look and behave differently</li>
+        <li><span class="chip ok">Met</span>Bookmarks, questions, topics and examples have separate counts</li>
+        <li><span class="chip ok">Met</span>AI grouping is editable and never overwrites student wording</li>
+        <li><span class="chip ok">Met</span>Every expert suggestion maps to a screen</li>
+        <li><span class="chip ok">Met</span>One scenario throughout, with synthetic data labeled</li>
+        <li><span class="chip part">Partly</span>Mobile frames for students: the spec suggested 390 × 844; we used desktop frames for both sides</li>
+        <li><span class="chip part">Partly</span>Reply notification: shown as a lot message and a “Replies (1)” button, not a separate card</li>
+      </ul>
+    </div>
+  </div>
+
+</section>
+
+<!-- Evaluation -->
+<section aria-labelledby="s-eval">
+  <div class="sec-head">
+    <p class="eyebrow">Evaluation</p>
+    <h2 id="s-eval">Four inspections, seventeen findings</h2>
+    <p>We ran two cognitive walkthroughs and two heuristic evaluations, then clicked through the build to check what the screenshots could not show. Two predicted problems turned out to be handled already.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 21</span><h3>Methods and coverage</h3></div>
+    <div class="plate-body">
+      <div class="methods">
+        <div class="method"><span class="tag">Walkthrough A</span><span class="what">Cognitive walkthrough</span><p>Wharton et al. (1994), clicked through in presentation mode. Share anonymously; keep a question private.</p><span class="ids">CWR-01, CWR-02</span></div>
+        <div class="method"><span class="tag">Walkthrough B</span><span class="what">Streamlined walkthrough</span><p>Spencer (2000), on design frames. Bookmark and recover, ask, check understanding, instructor publish.</p><span class="ids">SC-1 to SC-4</span></div>
+        <div class="method"><span class="tag">Heuristic review</span><span class="what">Instructor screens</span><p>Nielsen's 10 heuristics on insights, slide analytics, review and publishing (T1–T4).</p><span class="ids">HE-01 to HE-07</span></div>
+        <div class="method me"><span class="tag">Heuristic review <span class="mine">Mine</span></span><span class="what">Routine screens</span><p>Nielsen's 10 heuristics on lecture setup, checkpoint planning, the review reminder and My Bookmarks (T0, T5, S4–S5).</p><span class="ids">HE-08 to HE-12</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 22</span><h3>Findings by severity</h3></div>
+    <div class="plate-body" style="padding:0">
+      <div class="findings">
+        <div class="f-row head"><span>ID</span><span>Finding</span><span>Severity 0–4</span></div>
+        <div class="f-row"><span class="f-id">CW-1</span><span class="f-txt">No receipt in view after submitting or saving privately<small>Status and legend sit below the fold; the receipt doesn't say who can see the question</small></span><span class="sev"><i class="f3"></i><i class="f3"></i><i class="f3"></i><i></i><b>3</b></span></div>
+        <div class="f-row"><span class="f-id">CW-2</span><span class="f-txt">“Continue” names no destination; “Skip AI” has no visible effect</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">CW-6</span><span class="f-txt">“Park My Question” doesn't say it goes to the instructor<small>Found by both walkthroughs</small></span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">SC-1</span><span class="f-txt">No text list of a student's own questions; only cars on the map</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">SC-2</span><span class="f-txt">Preview and receipt don't say which students get the reply</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">SC-3</span><span class="f-txt">Slide bars are clickable but look like a read-only chart</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">CW-3</span><span class="f-txt">Help-type tiles show no selected state</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">CW-4</span><span class="f-txt">“Edit my question” opens a clarification prompt, not an editor</span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row me"><span class="f-id">HE-08</span><span class="f-txt">Lecture setup doesn't show whether the checkpoint is scheduled<small>My evaluation · provisional</small></span><span class="sev"><i class="f2"></i><i class="f2"></i><i></i><i></i><b>2</b></span></div>
+        <div class="f-row"><span class="f-id">SC-4</span><span class="f-txt">“Learning Check” may read as a graded quiz</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row"><span class="f-id">CW-9</span><span class="f-txt">Help types have different names for students and instructors</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row"><span class="f-id">HE-02</span><span class="f-txt">A seeded example and a student question can look identical</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row"><span class="f-id">CW-5</span><span class="f-txt">Anonymous is pre-selected, so the choice can go unnoticed</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row"><span class="f-id">CW-7</span><span class="f-txt">One topic is split across two zones</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row"><span class="f-id">CW-8</span><span class="f-txt">The private-draft state has five different names</span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row me"><span class="f-id">HE-09</span><span class="f-txt">“Remind me later” doesn't say when or where to resume<small>My evaluation · provisional</small></span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+        <div class="f-row me"><span class="f-id">HE-11</span><span class="f-txt">Bookmark cards show progress but not who can see the question<small>My evaluation · provisional</small></span><span class="sev"><i class="f1"></i><i></i><i></i><i></i><b>1</b></span></div>
+      </div>
+    </div>
+    <p class="plate-note">Nielsen's 0–4 severity scale. No finding blocked a task. Rows marked with a yellow edge come from my evaluation.</p>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 23</span><h3>Four patterns</h3></div>
+    <div class="plate-body">
+      <div class="themes">
+        <div class="theme"><span class="cnt">CW-1 · CW-6 · SC-2 · HE-11 · CW-5</span><b>“Who can see this?” is answered before, not after</b><p>The privacy screen is clear at the moment of choice. Once a student or instructor acts, the receipt is off-screen or silent about the audience.</p></div>
+        <div class="theme"><span class="cnt">SC-1 · SC-3 · CW-7</span><b>People struggle to find their own items</b><p>Students find their questions only as cars on a map. Instructors reach questions through charts that don't look clickable.</p></div>
+        <div class="theme"><span class="cnt">CW-2 · CW-3 · CW-4 · CW-8 · CW-9 · SC-4</span><b>AI controls and wording overlap</b><p>“Continue”, “Skip AI”, “Help me clarify” and “Edit my question” compete, and the same state carries different names.</p></div>
+        <div class="theme"><span class="cnt">HE-08 · HE-09 · HE-02</span><b>The routine needs visible status</b><p>Instructors can't confirm a checkpoint is scheduled; students aren't told where a deferred review waits.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 24</span><h3>What held up</h3></div>
+    <div class="plate-body">
+      <div class="grid g3">
+        <div class="card"><h4>One-click capture</h4><p>Bookmarking never pulled attention from the slide. The build confirms in place: “✓ Moment saved · Slide 18 · 2:14 PM”.</p></div>
+        <div class="card"><h4>The privacy screen</h4><p>Each option describes what the instructor and classmates will see, and the button relabels to match.</p></div>
+        <div class="card"><h4>Answered ≠ resolved</h4><p>Reading a reply doesn't close a question. Practice is labeled as unscored.</p></div>
+        <div class="card"><h4>AI under review</h4><p>Editing a group shows “Category edited · Originals unchanged”. Nothing publishes without a preview.</p></div>
+        <div class="card"><h4>Honest counts</h4><p>Bookmarks are “not a comprehension score”; instructor examples are excluded from totals (HE-12).</p></div>
+        <div class="card"><h4>A sized-up review</h4><p>The reminder shows “3 saved · about 2 minutes”, so students can decide whether to review now (HE-10).</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Next -->
+<section aria-labelledby="s-next">
+  <div class="sec-head">
+    <p class="eyebrow">Next</p>
+    <h2 id="s-next">Fix the labels, test the concept</h2>
+    <p>Feedback and wording problems are cheap to fix and need no user data. The metaphor, the role of AI and the anonymous default need real students before we change them.</p>
+  </div>
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 25</span><h3>Plan for the next round</h3></div>
+    <div class="plate-body">
+      <div class="road">
+        <div>
+          <p class="tag">Fix before testing</p>
+          <h4>Show the result, name the audience</h4>
+          <ul>
+            <li>Receipts in view: “Parked anonymously. Your instructor sees your question and slide, not your name.”</li>
+            <li>A “My questions” list beside the map and a pinned legend</li>
+            <li>One AI choice: “Continue without AI” or “Help me clarify”</li>
+            <li>One vocabulary for private drafts and help types</li>
+            <li>Recipient count on the instructor's preview and receipt</li>
+            <li>Checkpoint status in lecture setup; “Review pending in My Bookmarks”</li>
+          </ul>
+        </div>
+        <div class="test">
+          <p class="tag">Test with people first</p>
+          <h4>Think-aloud and an instructor walkthrough</h4>
+          <ul>
+            <li>4–5 graduate students from large lecture courses, Tasks 1, 2 and 5</li>
+            <li>Does “park” read as “send to the instructor”?</li>
+            <li>A TA or instructor runs review and respond (Tasks 3, 4)</li>
+            <li>Check the lot on smaller laptop screens</li>
+          </ul>
+          <p class="quote-check">After each task: “Right now, who can see your question?”</p>
+        </div>
+        <div>
+          <p class="tag">Keep as is</p>
+          <h4>What the evaluation supports</h4>
+          <ul>
+            <li>One-click bookmarking during class</li>
+            <li>The privacy screen and its relabeling button</li>
+            <li>Private drafts, instructor preview, answered vs. resolved</li>
+            <li>The parking-lot visualization, with clearer labels</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plate">
+    <div class="plate-top"><span class="fig">FIG. 26</span><h3>Assumptions to test, and what we won't build</h3></div>
+    <div class="plate-body">
+      <div class="grid g2">
+        <div class="voice">
+          <span class="tag">Assumptions, not claims</span>
+          <ul>
+            <li>One-click bookmarking disrupts less than typing a question live</li>
+            <li>Students revisit bookmarks when review is part of the course routine</li>
+            <li>The privacy choices are understandable for different social and language needs</li>
+            <li>Optional AI prompts help without taking ownership of the question</li>
+            <li>The parking metaphor makes follow-up visible rather than decorating a queue</li>
+            <li>Instructors can tell bookmarks from questions without extra monitoring burden</li>
+            <li>A reply plus a next-step choice helps more than a notification alone</li>
+          </ul>
+        </div>
+        <div class="voice">
+          <span class="tag">Deliberate non-goals</span>
+          <ul>
+            <li>No live red/green understanding vote or automatic alert</li>
+            <li>No inference of who is disengaged, confused or “at risk”</li>
+            <li>No AI-generated answer published as the instructor's reply</li>
+            <li>No real Canvas, slide or AI integration at this fidelity</li>
+            <li>No claims of learning gains or guaranteed anonymity before testing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screens -->
+<section aria-labelledby="s-screens">
+  <div class="sec-head">
+    <p class="eyebrow">Prototype</p>
+    <h2 id="s-screens">Key screens</h2>
+    <p>Low-fidelity Figma frames, 1440 px wide, with sample data from a Week 8 machine-learning lecture on optimization.</p>
+  </div>
+  <p class="subhead">Student</p>
+  <div class="screens">
+    <figure><img src="question-parking-lot/s1-entry.png" alt="Course entry screen" loading="lazy"><figcaption><b>S1</b>Course entry with routes to the lecture, bookmarks and lot, and a privacy notice.</figcaption></figure>
+    <figure><img src="question-parking-lot/s2-lecture.png" alt="Lecture slide viewer with Bookmark this moment button" loading="lazy"><figcaption><b>S2</b>The slide viewer. “Bookmark this moment” sits on every slide.</figcaption></figure>
+    <figure class="wide"><img src="question-parking-lot/s4-s5-review.png" alt="Review reminder and My Bookmarks drawer" loading="lazy"><figcaption><b>S4–S5</b>The end-of-class reminder and My Bookmarks, each moment with slide, time and status.</figcaption></figure>
+    <figure><img src="question-parking-lot/s6-draft.png" alt="Review saved moment with question draft" loading="lazy"><figcaption><b>S6</b>Saved context beside the draft, with optional AI help expanded.</figcaption></figure>
+    <figure><img src="question-parking-lot/s7-privacy.png" alt="Who can see this question overlay" loading="lazy"><figcaption><b>S7</b>Private, anonymous or named, each described by its consequence.</figcaption></figure>
+    <figure><img src="question-parking-lot/s9-reply.png" alt="Instructor response overlay" loading="lazy"><figcaption><b>S9</b>The reply, with the original question, slide and time.</figcaption></figure>
+    <figure><img src="question-parking-lot/s10-next.png" alt="Learning check choices" loading="lazy"><figcaption><b>S10</b>Choosing a next step without a learning score.</figcaption></figure>
+    <figure><img src="question-parking-lot/practice.png" alt="Practice problem with reveal worked steps" loading="lazy"><figcaption><b>Practice</b>Worked steps revealed on request. Practice doesn't resolve the question.</figcaption></figure>
+  </div>
+  <p class="subhead">Instructor</p>
+  <div class="screens">
+    <figure><img src="question-parking-lot/t0-prepare.png" alt="Prepare lecture overlay" loading="lazy"><figcaption><b>T0</b>Lecture setup: slides, example questions and the review routine.</figcaption></figure>
+    <figure><img src="question-parking-lot/t5-checkpoint.png" alt="Plan a learning checkpoint" loading="lazy"><figcaption><b>T5</b>Planning a checkpoint at a slide boundary.</figcaption></figure>
+    <figure><img src="question-parking-lot/t1-insights.png" alt="Instructor insights with counts" loading="lazy"><figcaption><b>T1</b>Class insights: bookmarks, questions and topics kept apart.</figcaption></figure>
+    <figure><img src="question-parking-lot/t2-slide.png" alt="Slide analytics" loading="lazy"><figcaption><b>T2</b>Slide 18 in an aggregate time window, with a route to its questions.</figcaption></figure>
+    <figure><img src="question-parking-lot/t3-review.png" alt="Review original questions" loading="lazy"><figcaption><b>T3</b>Editable AI summary beside the original submissions.</figcaption></figure>
+    <figure><img src="question-parking-lot/t4-respond.png" alt="Write an instructor response" loading="lazy"><figcaption><b>T4</b>Response with draft, preview and publish kept separate.</figcaption></figure>
+  </div>
+</section>
+
+<div class="foot">
+  <p>Team Google Scholars, CS 6750 Human-Computer Interaction, Georgia Tech, Fall 2026. Diagrams drawn from the D1–D3 reports, the D3 prototype specification and overview, and the team's Figma file.</p>
+  <p>The prototype uses sample data and scripted interactions. It is not a working classroom system, and no usability outcomes with real students have been measured yet.</p>
+</div>
+
+</div>
+</main>
+
+</body>
+</html>
